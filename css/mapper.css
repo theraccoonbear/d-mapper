@@ -1,0 +1,23 @@
+#mapArea {
+	width: 640px;
+	height: 480px;
+	background: #000;
+	background: url(../img/map-grid-empty.gif) repeat;
+	cursor: none;
+}
+
+.mapRoom {
+	background: url(../img/map-grid.gif) repeat;
+	position: absolute;
+	display: none;
+	cursor: none;
+}
+
+#cursorSnap {
+	border: 1px solid #64ce78;
+	background: #f33;
+	width: 3px;
+	height: 3px;
+	position: absolute;
+	z-index: 10000;
+}
