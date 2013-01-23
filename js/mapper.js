@@ -15,7 +15,8 @@ var mapper = {
 	
 	data: {
 		rooms: [],
-		doors: []
+		doors: [],
+		decorations: []
 	},
 	gridSize: 16,
 	width: 0,
@@ -129,6 +130,35 @@ var mapper = {
 		this.data.doors.push(door); //(block);
 	},
 	
+	drawColumn: function(col) {
+		var gs = this.gridSize;
+		
+		var r = Math.round(gs / 2);
+		var x = (col.x * gs) + r;
+		var y = (col.y * gs) + r;
+		
+		
+		var circle = this.overlay.circle(x, y, r - 4); 
+		circle.attr({
+			        'fill': "#666",
+			'stroke-width': 1,
+					  'stroke': '#000'
+		});
+		
+		
+		this.data.decorations.push(col); //(block);
+	},
+	
+	drawDecoration: function(dec) {
+		switch (dec.type) {
+			case 'column':
+				this.drawColumn(dec);
+				break;
+			default:
+				console.log('Unknown decoration type: ' + dec.type);
+		}
+	},
+	
 	pixelToGrid: function(v) {
 		return Math.round(v / this.gridSize);
 	},
@@ -185,6 +215,7 @@ var mapper = {
 			
 			mapper.data.rooms = [];
 			mapper.data.doors = [];
+			mapper.data.decorations = [];
 			
 			var mapData = cs.maps[mapName];
 			//console.log(mapData);
@@ -195,6 +226,10 @@ var mapper = {
 			
 			for (var idx in mapData.doors) {
 				this.drawDoor(mapData.doors[idx]);
+			}
+			
+			for (var idx in mapData.decorations) {
+				this.drawDecoration(mapData.decorations[idx]);
 			}
 			
 			//cs.maps[mapName] = mapper.data; //.serialize();

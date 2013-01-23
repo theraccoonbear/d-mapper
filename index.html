@@ -74,6 +74,7 @@
 						<input class="mapAction" type="button" value="Add Room" data-action="room"><br/>
 						<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
 						<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
+						<input class="mapAction" type="button" value="Add Column" data-action="column"><br/>
 					</form>
 				</div>
 				
@@ -186,6 +187,28 @@
 				return true;
 			};
 			
+			var addColumn = function() {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				mapper.drawDecoration({'x': x, 'y': y, 'type': 'column'});
+				return true;
+			};
+			
 			var saveMap = function() {
 				var mapName = $('#map-name').val();
 				if (mapper.saveLocal({name: mapName})) {
@@ -193,28 +216,6 @@
 				} else {
 					$('#map-name').addClass('error');
 				}
-				//if (/^[A-Za-z0-9-]+$/.test(mapName)) {
-				//	$('#map-name').removeClass('error');
-				//	if (typeof localStorage['d-mapper'] === 'undefined') { localStorage['d-mapper'] = '{}'; }
-				//	
-				//	var cs = false;
-				//	try {
-				//		cs = JSON.parse(localStorage['d-mapper']);
-				//	} catch (e) {
-				//		cs = false;
-				//	}
-				//	
-				//	if (cs === false) { cs = {}; }
-				//	
-				//	if (typeof cs.maps === 'undefined') { cs.maps = {}; }
-				//	cs.maps[mapName] = mapper.data; //.serialize();
-				//	localStorage['d-mapper'] = JSON.stringify(cs);
-				//	//localStorage['d-mapper']['maps'] = mapper;
-				//	return true;
-				//} else {
-				//	$('#map-name').addClass('error');
-				//	return false;
-				//}
 			};
 			
 			var loadMap = function() {
@@ -242,6 +243,8 @@
 					ret = addDoor(mapper.HORIZ);
 				} else if (action == 'vdoor') {
 					ret = addDoor(mapper.VERT);
+				} else if (action == 'column') {
+					ret = addColumn();
 				} else if (action == 'save') {
 					ret = saveMap();
 				} else if (action == 'load') {
