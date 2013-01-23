@@ -43,8 +43,9 @@
   <div role="main">
     <div id="sandbox">
 			<div id="mapArea">
-				<div id="cursorSnap"></div>
-				<div id="pointSet"></div>
+				<div id="cursorSnap" class="muie"><div id="activeSquare"></div></div>
+				<div id="pointSet" class="muie"></div>
+				<div id="marquee" class="muie"></div>
 				<!--<div class="mapRoom" data-layout="0,0-100,75"></div>
 				<div class="mapRoom" data-layout="5,8-2,5"></div>-->
 			</div>
@@ -101,15 +102,19 @@
 			// begin raphael
 			
 			mapper.init();
-			mapper.drawRectRoom({x:3, y:7, w:10, h:5})
-			mapper.drawRoundRoom({x: 25, y: 10, r: 5});
-			mapper.drawRectRoom({x: 13, y: 9, w: 10, h: 1});
-			mapper.drawDoor({x: 13, y: 9, orient: mapper.VERT});
+			//mapper.drawRectRoom({x:3, y:7, w:10, h:5})
+			//mapper.drawRoundRoom({x: 25, y: 10, r: 5});
+			//mapper.drawRectRoom({x: 13, y: 9, w: 10, h: 1});
+			//mapper.drawDoor({x: 13, y: 9, orient: mapper.VERT});
 		
 			
 			// end raphael
 			var $cursor = $('#cursorSnap');
 			var $point = $('#pointSet');
+			var $marquee = $('#marquee');
+			var button_down = false;
+			var init_x = 0;
+			var init_y = 0;
 			
 			var $room_x = $('#room-x');
 			var $room_y = $('#room-y');
@@ -233,6 +238,7 @@
 					$room_w.val('');
 					$room_h.val('');
 					$point.hide();
+					$marquee.hide();
 				}
 					
 				if (e.preventDefault) { e.preventDefault(); }
@@ -249,8 +255,6 @@
 					var y = (parseInt(matches[2]) * 16);
 					var w = parseInt(matches[3]) * 16;
 					var h = parseInt(matches[4]) * 16;
-					
-					
 					
 					$this.css({
 						'left': x + 'px',
@@ -271,7 +275,30 @@
 				var snap_x = mapper.snapPixel(real_x); //(Math.round(real_x / mapper.gridSize) * mapper.gridSize);
 				var snap_y = (Math.round(real_y / mapper.gridSize) * mapper.gridSize);
 				$cursor.css({left: snap_x - 1, top: snap_y - 1});
-			}).click(function(e) {
+				
+				if (button_down) {
+					var cur_x = mapper.snapPixel(e.clientX);
+					var cur_y = mapper.snapPixel(e.clientY);
+					
+					var x1 = Math.min(init_x, cur_x);
+					var y1 = Math.min(init_y, cur_y);
+					var x2 = Math.max(init_x, cur_x);
+					var y2 = Math.max(init_y, cur_y);
+					
+					var w = x2 - x1;
+					var h = y2 - y1;
+					
+					$room_x.val(mapper.pixelToGrid(x1));
+					$room_y.val(mapper.pixelToGrid(y1));
+					$room_w.val(mapper.pixelToGrid(w));
+					$room_h.val(mapper.pixelToGrid(h));
+					
+					$marquee.css({'left': x1, 'top': y1, 'width': w + 'px','height': h + 'px'}).show();
+				}
+				
+			}).mousedown(function(e) {
+				button_down = true;
+				
 				var x = mapper.pixelToGrid(e.clientX);
 				var y = mapper.pixelToGrid(e.clientY);
 				
@@ -279,6 +306,13 @@
 				
 				$room_x.val(x);
 				$room_y.val(y);
+				
+				init_x = mapper.snapPixel(e.clientX);
+				init_y = mapper.snapPixel(e.clientY);
+				$marquee.css({'left': init_x, 'top': init_y, 'width':'1px','height':'1px'}).show();
+				
+			}).mouseup(function(e) {
+				button_down = false;
 			});
 			
 		});

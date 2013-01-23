@@ -116,7 +116,7 @@ var mapper = {
 	},
 	
 	snapPixel: function(p) {
-		return (Math.round(p / this.gridSize) * this.gridSize);
+		return this.pixelToGrid(p) * this.gridSize;
 	},
 	
 	dump: function() {

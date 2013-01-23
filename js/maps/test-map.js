@@ -5,7 +5,6 @@ var map = {
 		"rooms": [
 			{
 				"layout": "3,3-10,5",
-				"doors": []
 			}
 		]
 	},

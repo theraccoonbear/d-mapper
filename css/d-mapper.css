@@ -17,24 +17,6 @@
 	cursor: none;
 }
 
-#cursorSnap {
-	border: 1px solid #64ce78;
-	background: #f33;
-	width: 3px;
-	height: 3px;
-	position: absolute;
-	z-index: 10000;
-}
-
-#pointSet {
-	border: 1px solid #008f0a;
-	background: #fffc00;
-	width: 3px;
-	height: 3px;
-	position: absolute;
-	z-index: 10000;
-}
-
 
 #raphael {
 	width: 1024px;
@@ -69,4 +51,42 @@ label {
 
 label > input.integer {
 	width: 50px;
+}
+
+
+
+/* UI elements */
+.muie {
+	position: absolute;
+	z-index: 10000;
+}
+
+#cursorSnap {
+	border: 1px solid #64ce78;
+	background: #f33;
+	width: 3px;
+	height: 3px;
+}
+
+#activeSquare {
+	/*border: 1px solid #64ce78;*/
+	background: #f6ff00;
+	width: 15px;
+	height: 16px;
+	opacity: 0.5;
+}
+
+#pointSet {
+	border: 1px solid #008f0a;
+	background: #fffc00;
+	width: 3px;
+	height: 3px;
+	display: none;
+}
+
+#marquee {
+	border: 1px solid #fff;
+	background-color: #fff;
+	opacity: 0.2;
+	display: none;
 }
