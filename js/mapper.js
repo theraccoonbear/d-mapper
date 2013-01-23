@@ -7,6 +7,12 @@ var mapper = {
 	
 	paper: null,
 	$paper: null,
+	
+	overlay: null,
+	$overlay: null,
+	
+	didInit: false,
+	
 	data: {
 		rooms: [],
 		doors: []
@@ -19,21 +25,33 @@ var mapper = {
 		return JSON.stringify(this.data);
 	},
 	
+	clear: function() {
+		var paperDom = this.paper.canvas;
+    paperDom.parentNode.removeChild(paperDom);
+		
+		var overlayDom = this.ovelay.canvas;
+    overlayDom.parentNode.removeChild(overlayDom);
+	},
+	
 	init: function(options) {
 		var o = {
-			paperSelector: '#raphael'
+			base: '#baseLayer',
+			overlay: '#overlayLayer'
 		}
 		
 		$.extend(o, options);
 		
-		this.$paper = $(o.paperSelector);
+		this.$paper = $(o.base);
+		this.$overlay = $(o.overlay);
+		
 		this.width = this.$paper.width();
 		this.height = this.$paper.height();
 		
 		
 		this.paper = new Raphael(this.$paper.get(0), this.width, this.height);
+		this.overlay  = new Raphael(this.$overlay.get(0), this.width, this.height);
 		this.paper.rect(0, 0, this.width, this.height).attr({fill: '#000'});
-		//var circle = paper.circle(100, 100, 80); 
+		this.didInit = true;
 	},
 	
 	loadMap: function(options) {
@@ -97,9 +115,9 @@ var mapper = {
 		var block = null;
 		
 		if (orient == this.VERT) {
-			block = this.paper.rect(x + -1, y + 4, 3, gs - 7);
+			block = this.overlay.rect(x + -1, y + 4, 3, gs - 7);
 		} else {
-			block = this.paper.rect(x + 4, y - 1, gs - 7, 3);
+			block = this.overlay.rect(x + 4, y - 1, gs - 7, 3);
 		}
 		
 		block.attr({
@@ -119,12 +137,72 @@ var mapper = {
 		return this.pixelToGrid(p) * this.gridSize;
 	},
 	
-	dump: function() {
-		
+	saveLocal: function(o) {
+		var mapName = o.name;
+		if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+			if (typeof localStorage['d-mapper'] === 'undefined') { localStorage['d-mapper'] = '{}'; }
+			
+			var cs = false;
+			try {
+				cs = JSON.parse(localStorage['d-mapper']);
+			} catch (e) {
+				cs = false;
+			}
+			
+			if (cs === false) { cs = {}; }
+			
+			if (typeof cs.maps === 'undefined') { cs.maps = {}; }
+			cs.maps[mapName] = mapper.data; //.serialize();
+			localStorage['d-mapper'] = JSON.stringify(cs);
+			return true;
+		} else {
+			return false;
+		}
 	},
 	
-	load: function() {
-		
+	loadLocal: function(o) {
+		var mapName = o.name;
+		if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+			if (typeof localStorage['d-mapper'] === 'undefined') {
+				return false;
+			}
+			
+			var cs = false;
+			try {
+				cs = JSON.parse(localStorage['d-mapper']);
+			} catch (e) {
+				return false;
+			}
+			
+			
+			if (typeof cs.maps === 'undefined') {
+				return false;	
+			}
+			
+			if (typeof cs.maps[mapName] === 'undefined') {
+				return false;
+			}
+			
+			mapper.data.rooms = [];
+			mapper.data.doors = [];
+			
+			var mapData = cs.maps[mapName];
+			//console.log(mapData);
+			
+			for (var idx in mapData.rooms) {
+				this.drawRectRoom(mapData.rooms[idx].opt);
+			}
+			
+			for (var idx in mapData.doors) {
+				this.drawDoor(mapData.doors[idx]);
+			}
+			
+			//cs.maps[mapName] = mapper.data; //.serialize();
+			//localStorage['d-mapper'] = JSON.stringify(cs);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 };

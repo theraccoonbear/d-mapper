@@ -17,12 +17,27 @@
 	cursor: none;
 }
 
-
-#raphael {
+.layer {
 	width: 1024px;
 	height: 768px;
-	border: 1px solid #000;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
+
+#workspace {
+	width: 1024px;
+	height: 768px;
+}
+
+#baseLayer {
+	z-index: 1000;
+}
+
+#overlayLayer {
+	z-index: 2000;
+}
+
 
 .col {
 	float: left;
@@ -85,8 +100,8 @@ label > input.integer {
 }
 
 #marquee {
-	border: 1px solid #fff;
+	border: 2px solid #666;
 	background-color: #fff;
-	opacity: 0.2;
+	opacity: 0.5;
 	display: none;
 }

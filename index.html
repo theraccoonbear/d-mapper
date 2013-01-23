@@ -50,8 +50,10 @@
 				<div class="mapRoom" data-layout="5,8-2,5"></div>-->
 			</div>
 
-			<div id="raphael" class="col"></div>
-			
+			<div id="workspace" class="col">
+				<div id="baseLayer" class="layer"></div>
+				<div id="overlayLayer" class="layer"></div>
+			</div>
 			<div id="controls" class="col">
 				<div class="formContainer">
 					<strong>Cursor:</strong> <span id="cursorPos">0, 0</span><br/>
@@ -186,27 +188,41 @@
 			
 			var saveMap = function() {
 				var mapName = $('#map-name').val();
-				if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+				if (mapper.saveLocal({name: mapName})) {
 					$('#map-name').removeClass('error');
-					if (typeof localStorage['d-mapper'] === 'undefined') { localStorage['d-mapper'] = '{}'; }
-					
-					var cs = false;
-					try {
-						cs = JSON.parse(localStorage['d-mapper']);
-					} catch (e) {
-						cs = false;
-					}
-					
-					if (cs === false) { cs = {}; }
-					
-					if (typeof cs.maps === 'undefined') { cs.maps = {}; }
-					cs.maps[mapName] = mapper.data; //.serialize();
-					localStorage['d-mapper'] = JSON.stringify(cs);
-					//localStorage['d-mapper']['maps'] = mapper;
-					return true;
 				} else {
 					$('#map-name').addClass('error');
-					return false;
+				}
+				//if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+				//	$('#map-name').removeClass('error');
+				//	if (typeof localStorage['d-mapper'] === 'undefined') { localStorage['d-mapper'] = '{}'; }
+				//	
+				//	var cs = false;
+				//	try {
+				//		cs = JSON.parse(localStorage['d-mapper']);
+				//	} catch (e) {
+				//		cs = false;
+				//	}
+				//	
+				//	if (cs === false) { cs = {}; }
+				//	
+				//	if (typeof cs.maps === 'undefined') { cs.maps = {}; }
+				//	cs.maps[mapName] = mapper.data; //.serialize();
+				//	localStorage['d-mapper'] = JSON.stringify(cs);
+				//	//localStorage['d-mapper']['maps'] = mapper;
+				//	return true;
+				//} else {
+				//	$('#map-name').addClass('error');
+				//	return false;
+				//}
+			};
+			
+			var loadMap = function() {
+				var mapName = $('#map-name').val();
+				if (mapper.loadLocal({name: mapName})) {
+					$('#map-name').removeClass('error');
+				} else {
+					$('#map-name').addClass('error');
 				}
 			};
 			
@@ -228,6 +244,8 @@
 					ret = addDoor(mapper.VERT);
 				} else if (action == 'save') {
 					ret = saveMap();
+				} else if (action == 'load') {
+					ret = loadMap();
 				} else {
 					console.log("Unknown action: " + action);
 				}
