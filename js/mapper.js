@@ -27,11 +27,21 @@ var mapper = {
 	},
 	
 	clear: function() {
-		var paperDom = this.paper.canvas;
-    paperDom.parentNode.removeChild(paperDom);
+		this.$paper.html('');
+		this.$overlay.html('');
 		
-		var overlayDom = this.ovelay.canvas;
-    overlayDom.parentNode.removeChild(overlayDom);
+		this.width = this.$paper.width();
+		this.height = this.$paper.height();
+		
+		this.paper = new Raphael(this.$paper.get(0), this.width, this.height);
+		this.overlay  = new Raphael(this.$overlay.get(0), this.width, this.height);
+		this.paper.rect(0, 0, this.width, this.height).attr({fill: '#000'});
+		
+//		var paperDom = this.paper.canvas;
+//    paperDom.parentNode.removeChild(paperDom);
+//		
+//		var overlayDom = this.overlay.canvas;
+//    overlayDom.parentNode.removeChild(overlayDom);
 	},
 	
 	init: function(options) {
@@ -45,13 +55,8 @@ var mapper = {
 		this.$paper = $(o.base);
 		this.$overlay = $(o.overlay);
 		
-		this.width = this.$paper.width();
-		this.height = this.$paper.height();
+		this.clear();
 		
-		
-		this.paper = new Raphael(this.$paper.get(0), this.width, this.height);
-		this.overlay  = new Raphael(this.$overlay.get(0), this.width, this.height);
-		this.paper.rect(0, 0, this.width, this.height).attr({fill: '#000'});
 		this.didInit = true;
 	},
 	
@@ -212,6 +217,8 @@ var mapper = {
 			if (typeof cs.maps[mapName] === 'undefined') {
 				return false;
 			}
+			
+			this.clear();
 			
 			mapper.data.rooms = [];
 			mapper.data.doors = [];
