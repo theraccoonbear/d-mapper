@@ -21,3 +21,9 @@
 	position: absolute;
 	z-index: 10000;
 }
+
+#raphael {
+	width: 1024px;
+	height: 768px;
+	border: 1px solid #000;
+}

@@ -17,7 +17,7 @@
   <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
 
   <link rel="stylesheet" href="css/style.css">
-	<link rel="stylesheet" href="css/mapper.css">
+	<link rel="stylesheet" href="css/d-mapper.css">
 	
 	<!-- Uncomment for Kalendae -->
 	<!-- <link rel="stylesheet" href="css/kalendae.css"> -->
@@ -42,12 +42,13 @@
 	
   <div role="main">
     <div id="sandbox">
-			<div id="mapArea">
+			<div id="raphael"></div>
+			
+			<!--<div id="mapArea">
 				<div id="cursorSnap"></div>
-				<div class="mapRoom" data-layout="3,3-10,5"></div>
+				<div class="mapRoom" data-layout="0,0-100,75"></div>
 				<div class="mapRoom" data-layout="5,8-2,5"></div>
-				
-			</div>
+			</div>-->
 		</div>
   </div>
   <footer>
@@ -62,6 +63,7 @@
   <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
 	<!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
+	<script src="js/raphael-min.js"></script>
 	<script src="js/mapper.js"></script>
 	<script type="text/javascript">
 		
@@ -70,6 +72,16 @@
 		var snap_granularity = 8;
 		
 		$(function() {
+			// begin raphael
+			
+			mapper.init();
+			mapper.drawRectRoom({x:3, y:7, w:10, h:5})
+			mapper.drawRoundRoom({x: 25, y: 10, r: 5});
+			mapper.drawRectRoom({x: 13, y: 9, w: 10, h: 1});
+			mapper.drawDoor({x: 13, y: 9, orient: mapper.VERT});
+		
+			
+			// end raphael
 			var $cursor = $('#cursorSnap');
 			
 		
