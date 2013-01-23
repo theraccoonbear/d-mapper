@@ -76,6 +76,8 @@
 						<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
 						<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
 						<input class="mapAction" type="button" value="Add Column" data-action="column"><br/>
+						<input class="mapAction" type="button" value="Add Monster" data-action="monster"><br/>
+						<input class="mapAction" type="button" value="Add Player" data-action="player"><br/>
 					</form>
 				</div>
 				
@@ -251,27 +253,84 @@
 				return false;
 			});
 			
+			var addPlayer = function() {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				mapper.drawPlayer({'x': x, 'y': y});
+				
+				return true;
+			};
+			
+			var addMonster = function() {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				mapper.drawMonster({'x': x, 'y': y});
+				
+				return true;
+			};
+			
 			$('.mapAction').click(function(e) {
 				var $this = $(this);
 				var action = $this.data('action');
 				var ret = true;
 				
-				if (action == 'room') {
-					ret = addRoom();
-				} else if (action == 'hdoor') {
-					ret = addDoor(mapper.HORIZ);
-				} else if (action == 'vdoor') {
-					ret = addDoor(mapper.VERT);
-				} else if (action == 'column') {
-					ret = addColumn();
-				} else if (action == 'save') {
-					ret = saveMap();
-				} else if (action == 'load') {
-					ret = loadMap();
-				} else if (action == 'listMaps') {
-					ret = listMaps();
-				} else {
-					console.log("Unknown action: " + action);
+				switch (action) {
+					case 'room':
+						ret = addRoom();
+						break;
+					case 'hdoor':
+						ret = addDoor(mapper.HORIZ);
+						break;
+					case 'column':
+						ret = addColumn();
+						break;
+					case'save':
+						ret = saveMap();
+						break;
+					case 'load':
+						ret = loadMap();
+						break;
+					case 'listMaps':
+						ret = listMaps();
+						break;
+					case 'monster':
+						ret = addMonster();
+						break;
+					case 'player':
+						ret = addPlayer();
+						break;
+					default:
+						console.log("Unknown action: " + action);
 				}
 				
 				if (ret) {

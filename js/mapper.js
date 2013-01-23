@@ -16,7 +16,8 @@ var mapper = {
 	data: {
 		rooms: [],
 		doors: [],
-		decorations: []
+		decorations: [],
+		moveable: [],
 	},
 	gridSize: 16,
 	width: 0,
@@ -164,6 +165,42 @@ var mapper = {
 		}
 	},
 	
+	
+	drawPlayer: function(mov) {
+		mov.type = 'player';
+		this.drawMoveable(mov);
+	},
+	
+	drawMonster: function(mov) {
+		mov.type = 'monster';
+		this.drawMoveable(mov);
+	},
+	
+	drawMoveable: function(mov) {
+		
+		var gs = this.gridSize;
+		
+		var x = mov.x * gs;
+		var y = mov.y * gs;
+		
+		var rectangle = this.overlay.rect(x, y, 16, 16);
+		rectangle.attr({
+			        'fill': "url('img/moveable-" + mov.type + ".png')",
+			'stroke-width': 0
+		});
+
+		this.data.moveable.push(mov);
+		
+		//switch (mov.type) {
+		//	case 'monster':
+		//		this.drawMonster(mov);
+		//		break;
+		//	case 'hero':
+		//		this.drawHero(mov);
+		//		break;
+		//}
+	},
+	
 	pixelToGrid: function(v) {
 		return Math.round(v / this.gridSize);
 	},
@@ -195,6 +232,7 @@ var mapper = {
 		}
 	},
 	
+	
 	loadLocal: function(o) {
 		var mapName = o.name;
 		if (/^[A-Za-z0-9-]+$/.test(mapName)) {
@@ -223,6 +261,7 @@ var mapper = {
 			mapper.data.rooms = [];
 			mapper.data.doors = [];
 			mapper.data.decorations = [];
+			mapper.data.moveable = [];
 			
 			var mapData = cs.maps[mapName];
 			//console.log(mapData);
@@ -237,6 +276,10 @@ var mapper = {
 			
 			for (var idx in mapData.decorations) {
 				this.drawDecoration(mapData.decorations[idx]);
+			}
+			
+			for (var idx in mapData.moveable) {
+				this.drawMoveable(mapData.moveable[idx]);
 			}
 			
 			//cs.maps[mapName] = mapper.data; //.serialize();

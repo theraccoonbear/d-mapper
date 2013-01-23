@@ -68,6 +68,22 @@ label > input.integer {
 	width: 50px;
 }
 
+/* players/monster */
+.avatar {
+	width: 16px;
+	height: 16px;
+	z-index: 3000;
+	position: absolute;
+	display: block;
+}
+
+.avatar.hero {
+	background-image: url(../img/hero.png);
+}
+
+.avatar.monster {
+	background-image: url(../img/orc.png);
+}
 
 
 /* UI elements */
