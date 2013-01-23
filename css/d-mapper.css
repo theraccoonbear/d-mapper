@@ -67,6 +67,6 @@ label {
 	margin-bottom: 10px;
 }
 
-label > input {
+label > input.integer {
 	width: 50px;
 }

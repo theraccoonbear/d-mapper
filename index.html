@@ -52,16 +52,29 @@
 			<div id="raphael" class="col"></div>
 			
 			<div id="controls" class="col">
-				<strong>Cursor:</strong> <span id="cursorPos"></span><br/>
-				<form id="addThings">
-					<label for="room-x">Top Left Corner X: <input id="room-x"></label><br/>
-					<label for="room-y">Top Left Corner Y: <input id="room-y"></label><br/>
-					<label for="room-w">Width: <input id="room-w"></label><br/>
-					<label for="room-h">Height: <input id="room-h"></label><br/>
-					<input class="mapAction" type="button" value="Add Room" data-action="room"><br/>
-					<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
-					<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
-				</form>	
+				<div class="formContainer">
+					<strong>Cursor:</strong> <span id="cursorPos">0, 0</span><br/>
+				</div>
+				
+				<div class="formContainer">
+					<label for="map-name">Map Name: <input type="text" id="map-name"></label><br/>
+					<input class="mapAction" type="button" value="Save Map (local)" data-action="save"><br/>
+					<input class="mapAction" type="button" value="Load Map (local)" data-action="load">
+				</div>
+				
+				<div class="formContainer">
+					<form id="addThings">
+						<label for="room-x">Top Left Corner X: <input id="room-x" class="integer"></label><br/>
+						<label for="room-y">Top Left Corner Y: <input id="room-y" class="integer"></label><br/>
+						<label for="room-w">Width: <input id="room-w" class="integer"></label><br/>
+						<label for="room-h">Height: <input id="room-h" class="integer"></label><br/>
+						<input class="mapAction" type="button" value="Add Room" data-action="room"><br/>
+						<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
+						<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
+					</form>
+				</div>
+				
+				
 			</div>
 			
 		</div>
@@ -166,6 +179,32 @@
 				return true;
 			};
 			
+			var saveMap = function() {
+				var mapName = $('#map-name').val();
+				if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+					$('#map-name').removeClass('error');
+					if (typeof localStorage['d-mapper'] === 'undefined') { localStorage['d-mapper'] = '{}'; }
+					
+					var cs = false;
+					try {
+						cs = JSON.parse(localStorage['d-mapper']);
+					} catch (e) {
+						cs = false;
+					}
+					
+					if (cs === false) { cs = {}; }
+					
+					if (typeof cs.maps === 'undefined') { cs.maps = {}; }
+					cs.maps[mapName] = mapper.data; //.serialize();
+					localStorage['d-mapper'] = JSON.stringify(cs);
+					//localStorage['d-mapper']['maps'] = mapper;
+					return true;
+				} else {
+					$('#map-name').addClass('error');
+					return false;
+				}
+			};
+			
 			$('#addThings').submit(function(e) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
@@ -182,6 +221,8 @@
 					ret = addDoor(mapper.HORIZ);
 				} else if (action == 'vdoor') {
 					ret = addDoor(mapper.VERT);
+				} else if (action == 'save') {
+					ret = saveMap();
 				} else {
 					console.log("Unknown action: " + action);
 				}

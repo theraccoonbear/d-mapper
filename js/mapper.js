@@ -7,12 +7,17 @@ var mapper = {
 	
 	paper: null,
 	$paper: null,
-	rooms: [],
-	doors: [],
+	data: {
+		rooms: [],
+		doors: []
+	},
 	gridSize: 16,
 	width: 0,
 	height: 0,
 	
+	serialize: function() {
+		return JSON.stringify(this.data);
+	},
 	
 	init: function(options) {
 		var o = {
@@ -40,11 +45,11 @@ var mapper = {
 	saveRoom: function(opt, svg) {
 		var o = {
 			'opt': opt,
-			'svg': svg,
+			//'svg': svg,
 			'visible': false
 		}
 		
-		this.rooms.push(o);
+		this.data.rooms.push(o);
 		
 		return o;
 	},
@@ -62,13 +67,16 @@ var mapper = {
 			'stroke-width': 0
 		});
 
-		this.rooms.push(rectangle);
+		room.type = 'rectangle';
+		//this.data.rooms.push(rectangle);
+		this.saveRoom(room, rectangle);
 	},
 	
 	drawRoundRoom: function(room) {
 		var x = room.x * this.gridSize;
 		var y = room.y * this.gridSize;
 		var radius = room.r * this.gridSize;
+		room.type = 'circle';
 		
 		var circle = this.paper.circle(x, y, radius); 
 		circle.attr({
@@ -76,7 +84,8 @@ var mapper = {
 			'stroke-width': 0
 		});
 		
-		this.rooms.push(circle);
+		this.saveRoom(room, circle);
+		//this.data.rooms.push(circle);
 	},
 	
 	drawDoor: function(door) {
@@ -99,7 +108,7 @@ var mapper = {
 			'stroke': '#000'
 		});
 		
-		this.doors.push(block);
+		this.data.doors.push(door); //(block);
 	},
 	
 	pixelToGrid: function(v) {
@@ -108,6 +117,14 @@ var mapper = {
 	
 	snapPixel: function(p) {
 		return (Math.round(p / this.gridSize) * this.gridSize);
+	},
+	
+	dump: function() {
+		
+	},
+	
+	load: function() {
+		
 	}
 	
 };
