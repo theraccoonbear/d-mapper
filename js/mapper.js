@@ -238,6 +238,31 @@ var mapper = {
 		} else {
 			return false;
 		}
+	},
+	
+	listMaps: function() {
+		if (typeof localStorage['d-mapper'] === 'undefined') {
+			return [];
+		}
+		
+		var cs = false;
+		try {
+			cs = JSON.parse(localStorage['d-mapper']);
+		} catch (e) {
+			return [];
+		}
+		
+		
+		if (typeof cs.maps === 'undefined') {
+			return [];	
+		}
+		
+		var ml = [];
+		for (var mapName in cs.maps) {
+			ml.push(mapName);
+		}
+		
+		return ml;
 	}
 	
 };

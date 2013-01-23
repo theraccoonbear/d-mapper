@@ -105,3 +105,19 @@ label > input.integer {
 	opacity: 0.5;
 	display: none;
 }
+
+.dialog {
+	display: none;
+	position: absolute;
+	background: #fff;
+	padding: 5px;
+	border: 2px solid #000;
+}
+
+.dialog .close {
+	float: right;
+	width: 29px;
+	height: 29px;
+	display: inline-block;
+	background-image: url(../img/close-button.png);
+}

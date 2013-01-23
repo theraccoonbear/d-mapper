@@ -60,9 +60,10 @@
 				</div>
 				
 				<div class="formContainer">
-					<label for="map-name">Map Name: <input type="text" id="map-name"></label><br/>
+					<label for="map-name">Map Name: <input type="text" id="map-name"></label><div class="dialog" id="mapList"></div><br/>
 					<input class="mapAction" type="button" value="Save Map (local)" data-action="save"><br/>
-					<input class="mapAction" type="button" value="Load Map (local)" data-action="load">
+					<input class="mapAction" type="button" value="Load Map (local)" data-action="load"><br/>
+					<input class="mapAction" type="button" value="List Maps (local)" data-action="listMaps">
 				</div>
 				
 				<div class="formContainer">
@@ -123,6 +124,8 @@
 			var $room_y = $('#room-y');
 			var $room_w = $('#room-w');
 			var $room_h = $('#room-h');
+			
+			var $mapname = $('#map-name');
 			
 			var int_rgx = new RegExp(/^\d+$/);
 			
@@ -227,6 +230,22 @@
 				}
 			};
 			
+			var listMaps = function() {
+				var maps = mapper.listMaps();
+				
+				var $list = $('#mapList');
+				var mkup = ['<span class="close"></span><br/><ul>'];
+				for (var i in maps) {
+					mkup.push('<li><a href="#" class="mapEntry" data-map="' + maps[i] + '">' + maps[i] + '</a></li>')
+				}
+				mkup.push('</ul>');
+				
+				
+				
+				$list.css({'left': $mapname.position().left + $mapname.width() + 5, 'top': $mapname.position().top});
+				$list.html(mkup.join("\n")).show(250);
+			};
+			
 			$('#addThings').submit(function(e) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
@@ -249,6 +268,8 @@
 					ret = saveMap();
 				} else if (action == 'load') {
 					ret = loadMap();
+				} else if (action == 'listMaps') {
+					ret = listMaps();
 				} else {
 					console.log("Unknown action: " + action);
 				}
@@ -334,6 +355,17 @@
 				
 			}).mouseup(function(e) {
 				button_down = false;
+			});
+			
+			$('.dialog .close').live('click', function(e) {
+				$(this).parent('.dialog').hide(250);
+			});
+			
+			$('a.mapEntry').live('click', function(e) {
+				var $this = $(this);
+				var name = $this.data('map');
+				$mapname.val(name);
+				
 			});
 			
 		});
