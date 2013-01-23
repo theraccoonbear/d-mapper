@@ -42,13 +42,28 @@
 	
   <div role="main">
     <div id="sandbox">
-			<div id="raphael"></div>
-			
-			<!--<div id="mapArea">
+			<div id="mapArea">
 				<div id="cursorSnap"></div>
-				<div class="mapRoom" data-layout="0,0-100,75"></div>
-				<div class="mapRoom" data-layout="5,8-2,5"></div>
-			</div>-->
+				<div id="pointSet"></div>
+				<!--<div class="mapRoom" data-layout="0,0-100,75"></div>
+				<div class="mapRoom" data-layout="5,8-2,5"></div>-->
+			</div>
+
+			<div id="raphael" class="col"></div>
+			
+			<div id="controls" class="col">
+				<strong>Cursor:</strong> <span id="cursorPos"></span><br/>
+				<form id="addThings">
+					<label for="room-x">Top Left Corner X: <input id="room-x"></label><br/>
+					<label for="room-y">Top Left Corner Y: <input id="room-y"></label><br/>
+					<label for="room-w">Width: <input id="room-w"></label><br/>
+					<label for="room-h">Height: <input id="room-h"></label><br/>
+					<input class="mapAction" type="button" value="Add Room" data-action="room"><br/>
+					<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
+					<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
+				</form>	
+			</div>
+			
 		</div>
   </div>
   <footer>
@@ -69,8 +84,6 @@
 		
 		var layout_rgx = new RegExp(/^\s*?(\d+)\s*?,\s*?(\d+)\s*?-\s*?(\d+)\s*?,\s*?(\d+)\s*?$/);
 		
-		var snap_granularity = 8;
-		
 		$(function() {
 			// begin raphael
 			
@@ -83,7 +96,107 @@
 			
 			// end raphael
 			var $cursor = $('#cursorSnap');
+			var $point = $('#pointSet');
 			
+			var $room_x = $('#room-x');
+			var $room_y = $('#room-y');
+			var $room_w = $('#room-w');
+			var $room_h = $('#room-h');
+			
+			var int_rgx = new RegExp(/^\d+$/);
+			
+			var addRoom = function() {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				var w = $room_w.val();
+				var h = $room_h.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(w)) {
+					$room_w.removeClass('error');
+				} else {
+					$room_w.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(h)) {
+					$room_h.removeClass('error');
+				} else {
+					$room_h.addClass('error');
+					return false;
+				}
+				
+				mapper.drawRectRoom({'x': x, 'y': y, 'w': w, 'h': h});
+				
+				return true;
+			};
+			
+			var addDoor = function(orient) {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				mapper.drawDoor({'x': x, 'y': y, 'orient': orient});
+				return true;
+			};
+			
+			$('#addThings').submit(function(e) {
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			});
+			
+			$('.mapAction').click(function(e) {
+				var $this = $(this);
+				var action = $this.data('action');
+				var ret = true;
+				
+				if (action == 'room') {
+					ret = addRoom();
+				} else if (action == 'hdoor') {
+					ret = addDoor(mapper.HORIZ);
+				} else if (action == 'vdoor') {
+					ret = addDoor(mapper.VERT);
+				} else {
+					console.log("Unknown action: " + action);
+				}
+				
+				if (ret) {
+					$room_x.val('');
+					$room_y.val('');
+					$room_w.val('');
+					$room_h.val('');
+					$point.hide();
+				}
+					
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			});
 		
 			$('.mapRoom').each(function() {
 				var $this = $(this);
@@ -95,6 +208,8 @@
 					var y = (parseInt(matches[2]) * 16);
 					var w = parseInt(matches[3]) * 16;
 					var h = parseInt(matches[4]) * 16;
+					
+					
 					
 					$this.css({
 						'left': x + 'px',
@@ -110,9 +225,19 @@
 				var real_x = e.clientX;
 				var real_y = e.clientY;
 				
-				var snap_x = (Math.round(real_x / snap_granularity) * snap_granularity) - 2;
-				var snap_y = (Math.round(real_y / snap_granularity) * snap_granularity) - 2;
+				$('#cursorPos').html(Math.round(real_x / mapper.gridSize) + ', ' + Math.round(real_y / mapper.gridSize));
+				
+				var snap_x = mapper.snapPixel(real_x); //(Math.round(real_x / mapper.gridSize) * mapper.gridSize);
+				var snap_y = (Math.round(real_y / mapper.gridSize) * mapper.gridSize);
 				$cursor.css({left: snap_x - 1, top: snap_y - 1});
+			}).click(function(e) {
+				var x = mapper.pixelToGrid(e.clientX);
+				var y = mapper.pixelToGrid(e.clientY);
+				
+				$point.css({left: mapper.snapPixel(e.clientX) - 1, top: mapper.snapPixel(e.clientY) - 1}).show();
+				
+				$room_x.val(x);
+				$room_y.val(y);
 			});
 			
 		});

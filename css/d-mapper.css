@@ -1,9 +1,13 @@
 #mapArea {
-	width: 640px;
-	height: 480px;
-	background: #000;
-	background: url(../img/map-grid-empty.gif) repeat;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1024px;
+	height: 768px;
+	/*background: #000;*/
+	/*background: url(../img/map-grid-empty.gif) repeat;*/
 	cursor: none;
+	z-index: 9999;
 }
 
 .mapRoom {
@@ -22,8 +26,47 @@
 	z-index: 10000;
 }
 
+#pointSet {
+	border: 1px solid #008f0a;
+	background: #fffc00;
+	width: 3px;
+	height: 3px;
+	position: absolute;
+	z-index: 10000;
+}
+
+
 #raphael {
 	width: 1024px;
 	height: 768px;
 	border: 1px solid #000;
+}
+
+.col {
+	float: left;
+}
+
+#controls {
+	width: 300px;
+}
+
+input {
+	border: 1px solid #000;
+	background-color: #fff;
+}
+
+input.error {
+	border-color: #f00;
+	background-color: #ffb0b6;
+}
+
+label {
+	text-align: right;
+	width: 250px;
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
+label > input {
+	width: 50px;
 }

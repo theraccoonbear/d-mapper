@@ -100,5 +100,14 @@ var mapper = {
 		});
 		
 		this.doors.push(block);
+	},
+	
+	pixelToGrid: function(v) {
+		return Math.round(v / this.gridSize);
+	},
+	
+	snapPixel: function(p) {
+		return (Math.round(p / this.gridSize) * this.gridSize);
 	}
+	
 };
