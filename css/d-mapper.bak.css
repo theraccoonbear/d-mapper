@@ -87,11 +87,6 @@ label > input.integer {
 
 
 /* UI elements */
-.wideButton {
-	width: 100%;
-	text-align: center;
-}
-
 .muie {
 	position: absolute;
 	z-index: 60;
@@ -118,12 +113,6 @@ label > input.integer {
 	width: 3px;
 	height: 3px;
 	display: none;
-}
-
-#featureIndicator {
-	display: none;
-	background: #f00;
-	border: 1px solid #f00;
 }
 
 #marquee {

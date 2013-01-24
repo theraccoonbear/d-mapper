@@ -85,6 +85,7 @@ var mapper = {
 		var y = room.y * this.gridSize;
 		var width = (room.w * this.gridSize) + 1;
 		var height = (room.h * this.gridSize) + 1;
+		room.type = 'rectangle';
 		
 		var rectangle = this.paper.rect(x, y, width, height);
 		rectangle.attr({
@@ -92,25 +93,26 @@ var mapper = {
 			'stroke-width': 0
 		});
 
-		room.type = 'rectangle';
-		//this.data.rooms.push(rectangle);
+		
 		this.saveRoom(room, rectangle);
 	},
 	
 	drawRoundRoom: function(room) {
-		var x = room.x * this.gridSize;
-		var y = room.y * this.gridSize;
-		var radius = room.r * this.gridSize;
-		room.type = 'circle';
+		var rx = (typeof room.r === 'undefined' ? (room.w / 2) : room.r) * this.gridSize;
+		var ry = (typeof room.r === 'undefined' ? (room.h / 2) : room.r) * this.gridSize;
 		
-		var circle = this.paper.circle(x, y, radius); 
-		circle.attr({
+		var x = (room.x * this.gridSize) + rx;
+		var y = (room.y * this.gridSize) + ry;
+		
+		room.type = 'ellipse';
+		
+		var ellipse = this.paper.ellipse(x, y, rx, ry)
+		ellipse.attr({
 			        'fill': "url('img/large-grid.png')",
 			'stroke-width': 0
 		});
 		
-		this.saveRoom(room, circle);
-		//this.data.rooms.push(circle);
+		this.saveRoom(room, ellipse);
 	},
 	
 	drawDoor: function(door) {
@@ -267,7 +269,11 @@ var mapper = {
 			//console.log(mapData);
 			
 			for (var idx in mapData.rooms) {
-				this.drawRectRoom(mapData.rooms[idx].opt);
+				if (mapData.rooms[idx].opt.type == 'ellipse') {
+					this.drawRoundRoom(mapData.rooms[idx].opt);
+				} else {
+					this.drawRectRoom(mapData.rooms[idx].opt);
+				}
 			}
 			
 			for (var idx in mapData.doors) {
