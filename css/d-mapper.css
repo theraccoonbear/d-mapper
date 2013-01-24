@@ -115,6 +115,12 @@ label > input.integer {
 	display: none;
 }
 
+#featureIndicator {
+	display: none;
+	background: #f00;
+	border: 1px solid #f00;
+}
+
 #marquee {
 	border: 2px solid #666;
 	background-color: #fff;
