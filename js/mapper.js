@@ -5,78 +5,110 @@ var mapper = {
 	map: {},
 	o: {},
 	
-	paper: null,
-	$paper: null,
+	roomLayer: null,
+	$roomLayer: null,
 	
-	overlay: null,
-	$overlay: null,
+	wallLayer: null,
+	$wallLayer: null,
+	
+	topLayer: null,
+	$topLayer: null,
 	
 	didInit: false,
 	
 	data: {
 		rooms: [],
 		doors: [],
+		walls: [],
 		decorations: [],
 		moveable: [],
+		meta: {}
 	},
+	
+	saved: true,
+	
 	gridSize: 16,
 	width: 0,
 	height: 0,
+	
+	outOfDate: function() {
+		this.saved = false;
+	},
 	
 	serialize: function() {
 		return JSON.stringify(this.data);
 	},
 	
 	clear: function() {
-		this.$paper.html('');
-		this.$overlay.html('');
+		this.$roomLayer.html('');
+		this.$wallLayer.html('');
+		this.$topLayer.html('');
 		
-		this.width = this.$paper.width();
-		this.height = this.$paper.height();
+		this.width = this.$roomLayer.width();
+		this.height = this.$roomLayer.height();
 		
-		this.paper = new Raphael(this.$paper.get(0), this.width, this.height);
-		this.overlay  = new Raphael(this.$overlay.get(0), this.width, this.height);
-		this.paper.rect(0, 0, this.width, this.height).attr({fill: '#000'});
+		this.roomLayer = new Raphael(this.$roomLayer.get(0), this.width, this.height);
+		this.wallLayer = new Raphael(this.$wallLayer.get(0), this.width, this.height);
+		this.topLayer  = new Raphael(this.$topLayer.get(0), this.width, this.height);
+		this.roomLayer.rect(0, 0, this.width, this.height).attr({fill: '#000'});
 		
-//		var paperDom = this.paper.canvas;
-//    paperDom.parentNode.removeChild(paperDom);
-//		
-//		var overlayDom = this.overlay.canvas;
-//    overlayDom.parentNode.removeChild(overlayDom);
+		
+		mapper.data.rooms = [];
+		mapper.data.doors = [];
+		mapper.data.walls = [];
+		mapper.data.decorations = [];
+		mapper.data.moveable = [];
+		mapper.data.meta = {};
+		
 	},
 	
 	init: function(options) {
 		var o = {
 			base: '#baseLayer',
-			overlay: '#overlayLayer'
+			wallLayer: '#wallLayer',
+			topLayer: '#topLayer',
 		}
 		
 		$.extend(o, options);
 		
-		this.$paper = $(o.base);
-		this.$overlay = $(o.overlay);
+		this.$roomLayer = $(o.base);
+		this.$wallLayer = $(o.wallLayer);
+		this.$topLayer = $(o.topLayer);
 		
 		this.clear();
 		
 		this.didInit = true;
 	},
-	
-	loadMap: function(options) {
-		mapper.init();
-		mapper.o = $.extend(options, defaults);
-		console.log(mapper.o);
-	},
+
 	
 	saveRoom: function(opt, svg) {
 		var o = {
 			'opt': opt,
-			//'svg': svg,
 			'visible': false
 		}
 		
 		this.data.rooms.push(o);
-		
 		return o;
+	},
+	
+	drawStairs: function(room) {
+		var x = room.x * this.gridSize;
+		var y = room.y * this.gridSize;
+		var width = (room.w * this.gridSize) + 1;
+		var height = (room.h * this.gridSize) + 1;
+		room.orient = room.orient == mapper.VERT ? mapper.VERT : mapper.HORIZ;
+		
+		var fill = room.orient == mapper.VERT ? 'vert' : 'horiz';
+		
+		room.type = 'stairs';
+		
+		var rectangle = this.roomLayer.rect(x, y, width, height);
+		rectangle.attr({
+			        'fill': "url('img/" + fill + "-stairs.png')",
+			'stroke-width': 0
+		});
+		this.outOfDate();
+		this.saveRoom(room, rectangle);
 	},
 	
 	drawRectRoom: function(room) {
@@ -87,15 +119,38 @@ var mapper = {
 		var height = (room.h * this.gridSize) + 1;
 		room.type = 'rectangle';
 		
-		var rectangle = this.paper.rect(x, y, width, height);
+		var rectangle = this.roomLayer.rect(x, y, width, height);
 		rectangle.attr({
 			        'fill': "url('img/large-grid.png')",
 			'stroke-width': 0
 		});
-
-		
+		this.outOfDate();
 		this.saveRoom(room, rectangle);
 	},
+	
+	drawRectWall: function(wall) {
+		
+		var x = wall.x * this.gridSize;
+		var y = wall.y * this.gridSize;
+		var width = (wall.w * this.gridSize) + 1;
+		var height = (wall.h * this.gridSize) + 1;
+		wall.type = 'rectangle';
+		
+		x += 1;
+		y += 1;
+		width -= 2;
+		height -= 2;
+		
+		var rectangle = this.wallLayer.rect(x, y, width, height);
+		rectangle.attr({
+			        'fill': "#000",
+			'stroke-width': 1,
+						'stroke': '#000'
+		});
+		this.outOfDate();
+		this.data.walls.push(wall)
+	},
+	
 	
 	drawRoundRoom: function(room) {
 		var rx = (typeof room.r === 'undefined' ? (room.w / 2) : room.r) * this.gridSize;
@@ -106,13 +161,35 @@ var mapper = {
 		
 		room.type = 'ellipse';
 		
-		var ellipse = this.paper.ellipse(x, y, rx, ry)
+		var ellipse = this.roomLayer.ellipse(x, y, rx, ry)
 		ellipse.attr({
 			        'fill': "url('img/large-grid.png')",
 			'stroke-width': 0
 		});
-		
+		this.outOfDate();
 		this.saveRoom(room, ellipse);
+	},
+	
+	drawRoundWall: function(wall) {
+		var rx = (typeof wall.r === 'undefined' ? (wall.w / 2) : room.r) * this.gridSize;
+		var ry = (typeof wall.r === 'undefined' ? (wall.h / 2) : room.r) * this.gridSize;
+		
+		rx -= 2;
+		ry -= 2;
+		
+		var x = (wall.x * this.gridSize) + rx;
+		var y = (wall.y * this.gridSize) + ry;
+		
+		wall.type = 'ellipse';
+		
+		var ellipse = this.wallLayer.ellipse(x, y, rx, ry)
+		ellipse.attr({
+			        'fill': "#000",
+			'stroke-width': 1,
+						'stroke': '#000'
+		});
+		this.outOfDate();
+		this.data.walls.push(wall);
 	},
 	
 	drawDoor: function(door) {
@@ -124,9 +201,9 @@ var mapper = {
 		var block = null;
 		
 		if (orient == this.VERT) {
-			block = this.overlay.rect(x + -1, y + 4, 3, gs - 7);
+			block = this.topLayer.rect(x + -1, y + 4, 3, gs - 7);
 		} else {
-			block = this.overlay.rect(x + 4, y - 1, gs - 7, 3);
+			block = this.topLayer.rect(x + 4, y - 1, gs - 7, 3);
 		}
 		
 		block.attr({
@@ -135,6 +212,7 @@ var mapper = {
 			'stroke': '#000'
 		});
 		
+		this.outOfDate();
 		this.data.doors.push(door); //(block);
 	},
 	
@@ -146,14 +224,14 @@ var mapper = {
 		var y = (col.y * gs) + r;
 		
 		
-		var circle = this.overlay.circle(x, y, r - 4); 
+		var circle = this.topLayer.circle(x, y, r - 4); 
 		circle.attr({
 			        'fill': "#666",
 			'stroke-width': 1,
 					  'stroke': '#000'
 		});
 		
-		
+		this.outOfDate();
 		this.data.decorations.push(col); //(block);
 	},
 	
@@ -185,22 +263,17 @@ var mapper = {
 		var x = mov.x * gs;
 		var y = mov.y * gs;
 		
-		var rectangle = this.overlay.rect(x, y, 16, 16);
+		var rectangle = this.topLayer.rect(x, y, 16, 16);
 		rectangle.attr({
 			        'fill': "url('img/moveable-" + mov.type + ".png')",
 			'stroke-width': 0
 		});
-
+		this.outOfDate();
 		this.data.moveable.push(mov);
-		
-		//switch (mov.type) {
-		//	case 'monster':
-		//		this.drawMonster(mov);
-		//		break;
-		//	case 'hero':
-		//		this.drawHero(mov);
-		//		break;
-		//}
+	},
+	
+	gridToPixel: function(g) {
+		return g * this.gridSize;
 	},
 	
 	pixelToGrid: function(v) {
@@ -213,7 +286,7 @@ var mapper = {
 	
 	saveLocal: function(o) {
 		var mapName = o.name;
-		if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+		if (/^[A-Za-z0-9-]+$/.test(mapName) || true) {
 			if (typeof localStorage['d-mapper'] === 'undefined') { localStorage['d-mapper'] = '{}'; }
 			
 			var cs = false;
@@ -226,6 +299,9 @@ var mapper = {
 			if (cs === false) { cs = {}; }
 			
 			if (typeof cs.maps === 'undefined') { cs.maps = {}; }
+			
+			mapper.data.meta['name'] = mapName;
+			mapper.saved = true;
 			cs.maps[mapName] = mapper.data; //.serialize();
 			localStorage['d-mapper'] = JSON.stringify(cs);
 			return true;
@@ -237,7 +313,7 @@ var mapper = {
 	
 	loadLocal: function(o) {
 		var mapName = o.name;
-		if (/^[A-Za-z0-9-]+$/.test(mapName)) {
+		if (/^[A-Za-z0-9-]+$/.test(mapName) || true) {
 			if (typeof localStorage['d-mapper'] === 'undefined') {
 				return false;
 			}
@@ -260,19 +336,25 @@ var mapper = {
 			
 			this.clear();
 			
-			mapper.data.rooms = [];
-			mapper.data.doors = [];
-			mapper.data.decorations = [];
-			mapper.data.moveable = [];
-			
 			var mapData = cs.maps[mapName];
 			//console.log(mapData);
 			
 			for (var idx in mapData.rooms) {
-				if (mapData.rooms[idx].opt.type == 'ellipse') {
-					this.drawRoundRoom(mapData.rooms[idx].opt);
+				var room = mapData.rooms[idx].opt;
+				if (room.type == 'ellipse') {
+					this.drawRoundRoom(room);
+				} else if (room.type == 'stairs') {
+					this.drawStairs(room);
 				} else {
-					this.drawRectRoom(mapData.rooms[idx].opt);
+					this.drawRectRoom(room);
+				}
+			}
+			
+			for (var idx in mapData.walls) {
+				if (mapData.walls[idx].opt.type == 'ellipse') {
+					this.drawRoundWall(mapData.walls[idx].opt);
+				} else {
+					this.drawRectWall(mapData.walls[idx].opt);
 				}
 			}
 			
@@ -287,6 +369,8 @@ var mapper = {
 			for (var idx in mapData.moveable) {
 				this.drawMoveable(mapData.moveable[idx]);
 			}
+			
+			this.saved = true;
 			
 			//cs.maps[mapName] = mapper.data; //.serialize();
 			//localStorage['d-mapper'] = JSON.stringify(cs);
@@ -315,10 +399,13 @@ var mapper = {
 		
 		var ml = [];
 		for (var mapName in cs.maps) {
+			console.log(mapName);
 			ml.push(mapName);
 		}
 		
-		return ml;
+		return cs.maps;
+		//
+		//return ml;
 	}
 	
 };

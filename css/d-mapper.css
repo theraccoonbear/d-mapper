@@ -2,8 +2,8 @@
 	position: absolute;
 	left: 0;
 	top: 0;
-	width: 1024px;
-	height: 768px;
+	width: 100%; /*1024px;*/
+	height: 100%; /*768px;*/
 	/*background: #000;*/
 	/*background: url(../img/map-grid-empty.gif) repeat;*/
 	cursor: none;
@@ -18,26 +18,30 @@
 }
 
 .layer {
-	width: 1024px;
-	height: 768px;
+	width: 100%; /*1024px;*/
+	height: 100%; /*768px;*/
 	position: absolute;
 	left: 0;
 	top: 0;
 }
 
+#baseLayer {
+	z-index: 1;
+}
+
+#wallLayer {
+	z-index: 2;
+}
+
+#topLayer {
+	z-index: 3;
+}
+
+
 #workspace {
 	width: 1024px;
 	height: 768px;
 }
-
-#baseLayer {
-	z-index: 10;
-}
-
-#overlayLayer {
-	z-index: 20;
-}
-
 
 .col {
 	float: left;
@@ -90,6 +94,7 @@ label > input.integer {
 .wideButton {
 	width: 100%;
 	text-align: center;
+	margin-bottom: 5px;
 }
 
 .muie {
@@ -124,6 +129,13 @@ label > input.integer {
 	display: none;
 	background: #f00;
 	border: 1px solid #f00;
+}
+
+#highlight {
+	border: 1px solid #f00;
+	background-color: #f00;
+	opacity: 0.5;
+	display: none;
 }
 
 #marquee {

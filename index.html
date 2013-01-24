@@ -51,13 +51,17 @@
 				<div id="cursorSnap" class="muie"><div id="activeSquare"></div></div>
 				<div id="pointSet" class="muie"><div id="featureIndicator"></div></div>
 				<div id="marquee" class="muie"></div>
+				<div id="highlight" class="muie"></div>
 				<!--<div class="mapRoom" data-layout="0,0-100,75"></div>
 				<div class="mapRoom" data-layout="5,8-2,5"></div>-->
 			</div>
 
 			<div id="workspace" class="col">
 				<div id="baseLayer" class="layer"></div>
-				<div id="overlayLayer" class="layer"></div>
+				
+				<div id="wallLayer" class="layer"></div>
+				
+				<div id="topLayer" class="layer"></div>
 			</div><!-- /#workspace -->
 			
 			<div id="controls" class="col">
@@ -70,37 +74,51 @@
 					</div>
 				<div id="tabs">
 					<ul>
-						<li><a href="#drawing">Draw</a></li>
-						<li><a href="#decoration">Deco.</a></li>
+						<li><a href="#layout">Layout</a></li>
+						<li><a href="#decoration">Details</a></li>
 						<li><a href="#files">Maps</a></li>
+						<li><a href="#rooms">Rooms</a></li>
 					</ul>
 					
 					
-					<div id="drawing" class="formContainer">
+					<div id="layout" class="formContainer">
 						<form class="addThings">
-							<input class="mapAction wideButton" type="button" value="Add Rectangular Room" data-action="room"><br/>
-							<input class="mapAction wideButton" type="button" value="Add Round Room" data-action="roundRoom"><br/>
+							<input class="mapAction wideButton" type="button" value="Rectangular Room" data-action="room"><br/>
+							<input class="mapAction wideButton" type="button" value="Round Room" data-action="roundRoom"><br/>
+								
+							<input class="mapAction wideButton" type="button" value="Horizontal Stairs" data-action="horizStairs"><br/>
+							<input class="mapAction wideButton" type="button" value="Vertical stairs" data-action="vertStairs"><br/>
+								
+							<input class="mapAction wideButton" type="button" value="Rectangular Wall" data-action="wall"><br/>
+							<input class="mapAction wideButton" type="button" value="Round Wall" data-action="roundWall"><br/>
+								
 						</form>
 					</div><!-- #drawing -->
 					
 					<div id="decoration">
 						<form class="addThings">
-							<input class="mapAction wideButton" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
-							<input class="mapAction wideButton" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
-							<input class="mapAction wideButton" type="button" value="Add Column" data-action="column"><br/>
-							<input class="mapAction wideButton" type="button" value="Add Monster" data-action="monster"><br/>
-							<input class="mapAction wideButton" type="button" value="Add Player" data-action="player"><br/>
+							<input class="mapAction wideButton" type="button" value="Horizontal Door" data-action="hdoor"><br/>
+							<input class="mapAction wideButton" type="button" value="Vertical Door" data-action="vdoor"><br/>
+							<input class="mapAction wideButton" type="button" value="Column" data-action="column"><br/>
+							<input class="mapAction wideButton" type="button" value="Monster" data-action="monster"><br/>
+							<input class="mapAction wideButton" type="button" value="Player" data-action="player"><br/>
 						</form>
 					</div><!-- /#decoration -->
 					
 					
 					<div id="files" class="formContainer">
 						<label for="map-name">Map Name: <input type="text" id="map-name"></label><br/>
+						<input class="mapAction wideButton" type="button" value="New Maps" data-action="newMap"><br/>
 						<input class="mapAction wideButton" type="button" value="Save Map (local)" data-action="save"><br/>
 						<input class="mapAction wideButton" type="button" value="Load Map (local)" data-action="load"><br/>
 						<input class="mapAction wideButton" type="button" value="List Maps (local)" data-action="listMaps"><br/>
 						<div class="dialog" id="mapList"></div>
 					</div><!-- /#files -->
+					
+					<div id="rooms" class="formContainer">
+						<ul class="list"></ul>
+					</div><!-- /#files -->
+					
 				</div><!-- /#tabs -->
 			</div><!-- /# controls -->
 			
@@ -134,7 +152,7 @@
 				title: "Map Controls",
 				resizable: false,
 				height: 'auto',
-				width: 400
+				width: 500
 			});
 			
 			$('#tabs').tabs();
@@ -145,7 +163,10 @@
 			
 			var $cursor = $('#cursorSnap');
 			var $point = $('#pointSet');
+			var $highlight = $('#highlight');
 			var $marquee = $('#marquee');
+			var $control = $('#controls');
+			var openAfterDrag = false;
 			var button_down = false;
 			var init_x = 0;
 			var init_y = 0;
@@ -160,6 +181,18 @@
 			var int_rgx = new RegExp(/^\d+$/);
 			
 			var $feature = $('#featureIndicator');
+			var $roomList = $('#rooms .list');
+			
+			var updateRoomList = function() {
+				
+				$roomList.html('');
+				
+				var rooms = mapper.data.rooms;
+				for (var i = 0; i < rooms.length; i++) {
+					var r = rooms[i];
+					$roomList.append('<li class="roomLink"><a href="#" data-idx="' + i + '">Room #' + (i + 1) + '</a></li>');
+				}
+			};
 			
 			var addRoom = function() {
 				var x = $room_x.val();
@@ -200,6 +233,86 @@
 				return true;
 			};
 			
+			var addStairs = function(orient) {
+				orient = orient == mapper.VERT ? mapper.VERT : mapper.HORIZ;
+				
+				var x = $room_x.val();
+				var y = $room_y.val();
+				var w = $room_w.val();
+				var h = $room_h.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(w) && w > 0) {
+					$room_w.removeClass('error');
+				} else {
+					$room_w.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(h) && h > 0) {
+					$room_h.removeClass('error');
+				} else {
+					$room_h.addClass('error');
+					return false;
+				}
+				
+				mapper.drawStairs({'x': x, 'y': y, 'w': w, 'h': h, 'orient': orient});
+				
+				return true;
+			};
+			
+			var addWall = function() {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				var w = $room_w.val();
+				var h = $room_h.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(w) && w > 0) {
+					$room_w.removeClass('error');
+				} else {
+					$room_w.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(h) && h > 0) {
+					$room_h.removeClass('error');
+				} else {
+					$room_h.addClass('error');
+					return false;
+				}
+				
+				mapper.drawRectWall({'x': x, 'y': y, 'w': w, 'h': h});
+				
+				return true;
+			};
+			
 			var addRoundRoom = function() {
 				var x = $room_x.val();
 				var y = $room_y.val();
@@ -235,6 +348,45 @@
 				}
 				
 				mapper.drawRoundRoom({'x': x, 'y': y, 'w': w, 'h': h});
+				
+				return true;
+			};
+			
+			var addRoundWall = function() {
+				var x = $room_x.val();
+				var y = $room_y.val();
+				var w = $room_w.val();
+				var h = $room_h.val();
+				
+				if (int_rgx.test(x)) {
+					$room_x.removeClass('error');
+				} else {
+					$room_x.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(y)) {
+					$room_y.removeClass('error');
+				} else {
+					$room_y.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(w) && w > 0) {
+					$room_w.removeClass('error');
+				} else {
+					$room_w.addClass('error');
+					return false;
+				}
+				
+				if (int_rgx.test(h) && h > 0) {
+					$room_h.removeClass('error');
+				} else {
+					$room_h.addClass('error');
+					return false;
+				}
+				
+				mapper.drawRoundWall({'x': x, 'y': y, 'w': w, 'h': h});
 				
 				return true;
 			};
@@ -310,6 +462,16 @@
 				return true;
 			};
 			
+			var newMap = function() {
+				if (!mapper.saved) {
+					if (!confirm("You have unsaved changes, are you sure?")) {
+						return false;
+					}
+				}
+				mapper.clear();
+				return true;
+			};
+			
 			var saveMap = function() {
 				var mapName = $('#map-name').val();
 				if (mapper.saveLocal({name: mapName})) {
@@ -317,15 +479,25 @@
 				} else {
 					$('#map-name').addClass('error');
 				}
+				
+				return true;
 			};
 			
 			var loadMap = function() {
+				if (!mapper.saved) {
+					if (!confirm("You have unsaved changes, are you sure?")) {
+						return false;
+					}
+				}
+				
 				var mapName = $('#map-name').val();
 				if (mapper.loadLocal({name: mapName})) {
 					$('#map-name').removeClass('error');
 				} else {
 					$('#map-name').addClass('error');
 				}
+				
+				return true;
 			};
 			
 			var listMaps = function() {
@@ -334,7 +506,9 @@
 				var $list = $('#mapList');
 				var mkup = ['<span class="close"></span><br/><ul>'];
 				for (var i in maps) {
-					mkup.push('<li><a href="#" class="mapEntry" data-map="' + maps[i] + '">' + maps[i] + '</a></li>')
+					console.log(maps[i]);
+					
+					mkup.push('<li><a href="#" class="mapEntry" data-map="' + i + '">' + i + ' (' + maps[i].rooms.length + ' rooms)</a></li>')
 				}
 				mkup.push('</ul>');
 				
@@ -427,6 +601,18 @@
 					case 'room':
 						ret = addRoom();
 						break;
+					case 'vertStairs':
+						ret = addStairs(mapper.VERT);
+						break;
+					case 'horizStairs':
+						ret = addStairs(mapper.HORIZ);
+						break;
+					case 'roundWall':
+						ret = addRoundWall();
+						break;
+					case 'wall':
+						ret = addWall();
+						break;
 					case 'hdoor':
 						ret = addDoor(mapper.HORIZ);
 						break;
@@ -435,6 +621,9 @@
 						break;
 					case 'column':
 						ret = addColumn();
+						break;
+					case 'newMap':
+						ret = newMap();
 						break;
 					case'save':
 						ret = saveMap();
@@ -462,6 +651,7 @@
 					$room_h.val('');
 					$point.hide();
 					$marquee.hide();
+					updateRoomList();
 				}
 					
 				if (e.preventDefault) { e.preventDefault(); }
@@ -475,6 +665,7 @@
 				
 				switch (action) {
 					case 'room':
+					case 'roundRoom':
 						break;
 					case 'hdoor':
 						ret = showDoor(mapper.HORIZ);
@@ -532,6 +723,7 @@
 				$cursor.css({left: snap_x - 1, top: snap_y - 1});
 				
 				if (button_down) {
+					$control.slideUp(100);
 					var cur_x = mapper.snapPixel(e.clientX);
 					var cur_y = mapper.snapPixel(e.clientY);
 					
@@ -552,24 +744,34 @@
 				}
 				
 			}).mousedown(function(e) {
-				button_down = true;
+				if (e.button == 0) {
 				
-				var x = mapper.pixelToGrid(e.clientX);
-				var y = mapper.pixelToGrid(e.clientY);
-				
-				$point.css({left: mapper.snapPixel(e.clientX) - 1, top: mapper.snapPixel(e.clientY) - 1}).show();
-				
-				$room_x.val(x);
-				$room_y.val(y);
-				$room_w.val(0);
-				$room_h.val(0);
-				
-				init_x = mapper.snapPixel(e.clientX);
-				init_y = mapper.snapPixel(e.clientY);
-				$marquee.css({'left': init_x, 'top': init_y, 'width':'1px','height':'1px'}).show();
-				
+					button_down = true;
+					
+					var x = mapper.pixelToGrid(e.clientX);
+					var y = mapper.pixelToGrid(e.clientY);
+					
+					$point.css({left: mapper.snapPixel(e.clientX) - 1, top: mapper.snapPixel(e.clientY) - 1}).show();
+					
+					$room_x.val(x);
+					$room_y.val(y);
+					$room_w.val(0);
+					$room_h.val(0);
+					
+					init_x = mapper.snapPixel(e.clientX);
+					init_y = mapper.snapPixel(e.clientY);
+					$marquee.css({'left': init_x, 'top': init_y, 'width':'1px','height':'1px'}).show();
+					
+					if (!$control.is(':hidden')) {
+						openAfterDrag = true;
+					}
+				}
 			}).mouseup(function(e) {
 				button_down = false;
+				if (openAfterDrag) {
+					$control.slideDown(100);
+				}
+				openAfterDrag = false;
 			});
 			
 			$(document).on("click", ".dialog .close", function(e){
@@ -589,16 +791,25 @@
 			});
 			
 			$(document).on('dblclick', '.ui-dialog-titlebar', function(e) {
-				var $control = $('#controls');
+				$control.slideToggle(100);
+			});
+			
+			$(document).on('mouseenter', '.roomLink a', function(e) {
+				var $this = $(this);
+				var idx = $this.data('idx');
+				var room = mapper.data.rooms[idx].opt;
 				
-				$control.slideToggle();
-				//
-				//if ($control.hasClass('closed')) {
-				//	$control.removeClass('closed');	
-				//} else {
-				//	
-				//	$control.slideUp().addClass('closed');
-				//}
+				$highlight.css({
+					'left': mapper.gridToPixel(room.x),
+					'top': mapper.gridToPixel(room.y),
+					'width': mapper.gridToPixel(room.w),
+					'height': mapper.gridToPixel(room.h)
+				}).show();
+				//console.log(room);
+			});
+			
+			$(document).on('mouseleave', '.roomLink a', function(e) {
+				$highlight.hide();
 			});
 			
 		});
