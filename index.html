@@ -44,7 +44,7 @@
     <div id="sandbox">
 			<div id="mapArea">
 				<div id="cursorSnap" class="muie"><div id="activeSquare"></div></div>
-				<div id="pointSet" class="muie"></div>
+				<div id="pointSet" class="muie"><div id="featureIndicator"></div></div>
 				<div id="marquee" class="muie"></div>
 				<!--<div class="mapRoom" data-layout="0,0-100,75"></div>
 				<div class="mapRoom" data-layout="5,8-2,5"></div>-->
@@ -131,6 +131,8 @@
 			
 			var int_rgx = new RegExp(/^\d+$/);
 			
+			var $feature = $('#featureIndicator');
+			
 			var addRoom = function() {
 				var x = $room_x.val();
 				var y = $room_y.val();
@@ -151,14 +153,14 @@
 					return false;
 				}
 				
-				if (int_rgx.test(w)) {
+				if (int_rgx.test(w) && w > 0) {
 					$room_w.removeClass('error');
 				} else {
 					$room_w.addClass('error');
 					return false;
 				}
 				
-				if (int_rgx.test(h)) {
+				if (int_rgx.test(h) && h > 0) {
 					$room_h.removeClass('error');
 				} else {
 					$room_h.addClass('error');
@@ -190,6 +192,32 @@
 				
 				mapper.drawDoor({'x': x, 'y': y, 'orient': orient});
 				return true;
+			};
+			
+			var showDoor = function(orient) {
+			  var x = $room_x.val();
+			  var y = $room_y.val();
+			  
+			  if (!int_rgx.test(x)) {
+				  return false;
+			  }
+			  
+			  if (!int_rgx.test(y)) {
+				  return false;
+			  }
+			  
+			  if (orient == mapper.HORIZ) {
+			    $feature.css({width: mapper.gridSize, height: 3});
+			  } else {
+			    $feature.css({width: 3, height: mapper.gridSize});
+			  }
+			  
+			  $feature.fadeIn(100);
+			  
+			  return true;
+			  
+			  //mapper.drawDoor({'x': x, 'y': y, 'orient': orient});
+			  //return true;
 			};
 			
 			var addColumn = function() {
@@ -299,6 +327,26 @@
 				return true;
 			};
 			
+			var showOccupant = function(e) {
+			  var x = $room_x.val();
+			  var y = $room_y.val();
+			  
+			  if (!int_rgx.test(x)) {
+			    return false;
+			  }
+			  
+			  if (!int_rgx.test(y)) {
+			    return false;
+			  }
+			  
+			  $feature.css({width: mapper.gridSize, height: mapper.gridSize});
+			  
+			  
+			  $feature.fadeIn(100);
+
+			  return true;
+			}
+			
 			$('.mapAction').click(function(e) {
 				var $this = $(this);
 				var action = $this.data('action');
@@ -347,6 +395,36 @@
 					
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
+			}).hover(function(e) {
+			  var $this = $(this);
+				var action = $this.data('action');
+				var ret = true;
+				
+				switch (action) {
+					case 'room':
+						break;
+					case 'hdoor':
+						ret = showDoor(mapper.HORIZ);
+						break;
+					case 'vdoor':
+						ret = showDoor(mapper.VERT);
+						break;
+					case'save':
+						break;
+					case 'load':
+						break;
+					case 'listMaps':
+						break;
+					case 'column':
+					case 'monster':
+					case 'player':
+						ret = showOccupant();
+						break;
+					default:
+						console.log("Unknown action: " + action);
+				}
+			}, function(e) {
+			  $feature.fadeOut(100);
 			});
 		
 			$('.mapRoom').each(function() {
@@ -410,6 +488,8 @@
 				
 				$room_x.val(x);
 				$room_y.val(y);
+				$room_w.val(0);
+				$room_h.val(0);
 				
 				init_x = mapper.snapPixel(e.clientX);
 				init_y = mapper.snapPixel(e.clientY);
