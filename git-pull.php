@@ -1,7 +1,11 @@
 <?php
+header("Content-Type: text/plain");
+print "Pulling...\n";
 
 $dir = dirname(__FILE__);
 
-system("git pull $dir");
+print "<output>" . system("git pull $dir") . "</output>\n";
+
+print "...done.\n";
 
 ?>
