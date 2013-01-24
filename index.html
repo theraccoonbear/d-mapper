@@ -17,7 +17,12 @@
   <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
 
   <link rel="stylesheet" href="css/style.css">
+	
+	<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.19.custom.css" />
+	
 	<link rel="stylesheet" href="css/d-mapper.css">
+	
+	
 	
 	<!-- Uncomment for Kalendae -->
 	<!-- <link rel="stylesheet" href="css/kalendae.css"> -->
@@ -53,36 +58,49 @@
 			<div id="workspace" class="col">
 				<div id="baseLayer" class="layer"></div>
 				<div id="overlayLayer" class="layer"></div>
-			</div>
+			</div><!-- /#workspace -->
+			
 			<div id="controls" class="col">
 				<div class="formContainer">
-					<strong>Cursor:</strong> <span id="cursorPos">0, 0</span><br/>
-				</div>
-				
-				<div class="formContainer">
-					<label for="map-name">Map Name: <input type="text" id="map-name"></label><div class="dialog" id="mapList"></div><br/>
-					<input class="mapAction" type="button" value="Save Map (local)" data-action="save"><br/>
-					<input class="mapAction" type="button" value="Load Map (local)" data-action="load"><br/>
-					<input class="mapAction" type="button" value="List Maps (local)" data-action="listMaps">
-				</div>
-				
-				<div class="formContainer">
-					<form id="addThings">
-						<label for="room-x">Top Left Corner X: <input id="room-x" class="integer"></label><br/>
-						<label for="room-y">Top Left Corner Y: <input id="room-y" class="integer"></label><br/>
-						<label for="room-w">Width: <input id="room-w" class="integer"></label><br/>
-						<label for="room-h">Height: <input id="room-h" class="integer"></label><br/>
-						<input class="mapAction" type="button" value="Add Room" data-action="room"><br/>
-						<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
-						<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
-						<input class="mapAction" type="button" value="Add Column" data-action="column"><br/>
-						<input class="mapAction" type="button" value="Add Monster" data-action="monster"><br/>
-						<input class="mapAction" type="button" value="Add Player" data-action="player"><br/>
-					</form>
-				</div>
-				
-				
-			</div>
+						<strong>Cursor:</strong> <span id="cursorPos">0, 0</span><br/>
+						<label for="room-x">X: <input id="room-x" class="integer" title="Top Left Corner X"></label>
+						<label for="room-y">Y: <input id="room-y" class="integer" title="Top Left Corner Y"></label><br/>
+						<label for="room-w">W: <input id="room-w" class="integer" title="Width"></label>
+						<label for="room-h">H: <input id="room-h" class="integer" title="Height"></label><br/>
+					</div>
+				<div id="tabs">
+					<ul>
+						<li><a href="#files">Maps</a></li>
+						<li><a href="#drawing">Draw</a></li>
+						<li><a href="#decoration">Deco.</a></li>
+					</ul>
+					
+					<div id="files" class="formContainer">
+						<label for="map-name">Map Name: <input type="text" id="map-name"></label><br/>
+						<input class="mapAction" type="button" value="Save Map (local)" data-action="save"><br/>
+						<input class="mapAction" type="button" value="Load Map (local)" data-action="load"><br/>
+						<input class="mapAction" type="button" value="List Maps (local)" data-action="listMaps"><br/>
+						<div class="dialog" id="mapList"></div>
+					</div><!-- /#files -->
+					
+					<div id="drawing" class="formContainer">
+						<form class="addThings">
+							<input class="mapAction" type="button" value="Add Room" data-action="room"><br/>
+							<input class="mapAction" type="button" value="Add Round Room" data-action="roundRoom"><br/>
+						</form>
+					</div><!-- #drawing -->
+					
+					<div id="decoration">
+						<form class="addThings">
+							<input class="mapAction" type="button" value="Add Horiz. Door" data-action="hdoor"><br/>
+							<input class="mapAction" type="button" value="Add Vert. Door" data-action="vdoor"><br/>
+							<input class="mapAction" type="button" value="Add Column" data-action="column"><br/>
+							<input class="mapAction" type="button" value="Add Monster" data-action="monster"><br/>
+							<input class="mapAction" type="button" value="Add Player" data-action="player"><br/>
+						</form>
+					</div><!-- /#decoration -->
+				</div><!-- /#tabs -->
+			</div><!-- /# controls -->
 			
 		</div>
   </div>
@@ -94,8 +112,9 @@
   <!-- JavaScript at the bottom for fast page loading -->
 
   <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+  <!--<script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>-->
 	<!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
 	<script src="js/raphael-min.js"></script>
@@ -105,16 +124,23 @@
 		var layout_rgx = new RegExp(/^\s*?(\d+)\s*?,\s*?(\d+)\s*?-\s*?(\d+)\s*?,\s*?(\d+)\s*?$/);
 		
 		$(function() {
-			// begin raphael
+			$('#controls').dialog({
+				closeOnEscape: false,
+				open: function(event, ui) {
+					$(".ui-dialog-titlebar-close").remove();
+				},
+				title: "Map Controls",
+				resizable: false,
+				height: 'auto',
+				width: 400
+			});
+			
+			$('#tabs').tabs();
+			
+			//$('#controls').parent('.ui-dialog').css({'z-index': 9000});
 			
 			mapper.init();
-			//mapper.drawRectRoom({x:3, y:7, w:10, h:5})
-			//mapper.drawRoundRoom({x: 25, y: 10, r: 5});
-			//mapper.drawRectRoom({x: 13, y: 9, w: 10, h: 1});
-			//mapper.drawDoor({x: 13, y: 9, orient: mapper.VERT});
-		
 			
-			// end raphael
 			var $cursor = $('#cursorSnap');
 			var $point = $('#pointSet');
 			var $marquee = $('#marquee');
@@ -248,7 +274,7 @@
 				$list.html(mkup.join("\n")).show(250);
 			};
 			
-			$('#addThings').submit(function(e) {
+			$('.addThings').submit(function(e) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
 			});
@@ -419,22 +445,41 @@
 				button_down = false;
 			});
 			
-			$('.dialog .close').live('click', function(e) {
+			$(document).on("click", ".dialog .close", function(e){
+			//$('.dialog .close').live('click', function(e) {
 				$(this).parent('.dialog').hide(250);
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
 			});
 			
-			$('a.mapEntry').live('click', function(e) {
+			$(document).on("click", "a.mapEntry", function(e) {
+			//$('a.mapEntry').live('click', function(e) {
 				var $this = $(this);
 				var name = $this.data('map');
 				$mapname.val(name);
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			});
+			
+			$(document).on('dblclick', '.ui-dialog-titlebar', function(e) {
+				var $control = $('#controls');
 				
+				$control.slideToggle();
+				//
+				//if ($control.hasClass('closed')) {
+				//	$control.removeClass('closed');	
+				//} else {
+				//	
+				//	$control.slideUp().addClass('closed');
+				//}
 			});
 			
 		});
 	</script>
 	
 	<!-- Uncomment for jQuery UI -->
-  <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>-->
+  <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>-->
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
   
 	<!-- Uncomment for Kalendae -->
 	<!--<script src="js/libs/kalendae.min.js" type="text/javascript" charset="utf-8"></script>-->

@@ -7,7 +7,7 @@
 	/*background: #000;*/
 	/*background: url(../img/map-grid-empty.gif) repeat;*/
 	cursor: none;
-	z-index: 9999;
+	z-index: 50;
 }
 
 .mapRoom {
@@ -31,11 +31,11 @@
 }
 
 #baseLayer {
-	z-index: 1000;
+	z-index: 10;
 }
 
 #overlayLayer {
-	z-index: 2000;
+	z-index: 20;
 }
 
 
@@ -44,12 +44,12 @@
 }
 
 #controls {
-	width: 300px;
+	width: 500px;
 }
 
 input {
 	/*border: 1px solid #000;*/
-	background-color: #fff;
+	/*background-color: #fff;*/
 }
 
 input.error {
@@ -59,7 +59,7 @@ input.error {
 
 label {
 	text-align: right;
-	width: 250px;
+	width: 100px;
 	display: inline-block;
 	margin-bottom: 10px;
 }
@@ -72,7 +72,7 @@ label > input.integer {
 .avatar {
 	width: 16px;
 	height: 16px;
-	z-index: 3000;
+	z-index: 30;
 	position: absolute;
 	display: block;
 }
@@ -89,7 +89,7 @@ label > input.integer {
 /* UI elements */
 .muie {
 	position: absolute;
-	z-index: 10000;
+	z-index: 60;
 }
 
 #cursorSnap {
@@ -124,7 +124,7 @@ label > input.integer {
 
 .dialog {
 	display: none;
-	position: absolute;
+	/*position: absolute;*/
 	background: #fff;
 	padding: 5px;
 	border: 2px solid #000;
