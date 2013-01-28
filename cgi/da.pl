@@ -33,8 +33,10 @@ $schema->{maps} = <<__SQL;
 CREATE TABLE IF NOT EXISTS maps (
   `id` INT PRIMARY KEY,
   `user_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT NOT NULL,
   `map` TEXT NOT NULL,
-  `created` datetime default current_timestamp
+  `created` DATETIME DEFAULT current_timestamp
 );
 __SQL
 
@@ -47,7 +49,7 @@ sub tableExists {
   return $result >= 1;
 }
 
-my $rebuild = 0;
+my $rebuild = 1;
 
 foreach my $key (sort keys %{$schema}) {
   
