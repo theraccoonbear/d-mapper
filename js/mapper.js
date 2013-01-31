@@ -20,6 +20,7 @@ var mapper = {
 	layers: {
 		rooms: {},
 		walls: {},
+		grid: {},
 		decorations: {}
 	},
 	
@@ -48,6 +49,30 @@ var mapper = {
 		return JSON.stringify(this.data);
 	},
 	
+	drawGrid: function() {
+		
+		var pathStr = '';
+		
+		for (var x = 1; x <= this.width; x += this.gridSize) {
+			pathStr += 'M ' + x + ' 0 L ' + x + ' ' + this.height + ' ';
+		}
+		
+		for (var y = 1; y <= this.height; y += this.gridSize) {
+			pathStr += 'M 0 ' + y + ' L ' + this.width + ' ' + y + ' ';
+		}
+		
+		var grid = this.paper.path(pathStr);
+		grid.attr({
+							stroke: '#000',
+			'stroke-width': 1
+		});
+		
+		this.layers.grid.push(grid);
+		
+		setInterval(function() { grid.toFront(); }, 250);
+		
+	},
+	
 	clear: function() {
 		this.$paper.html('');
 		//this.$roomLayer.html('');
@@ -59,6 +84,8 @@ var mapper = {
 		this.width = this.$paper.width();
 		this.height = this.$paper.height();
 		
+		$('#saveCanvas').css({width: this.width, height: this.height});
+		
 		//this.roomLayer = new Raphael(this.$roomLayer.get(0), this.width, this.height);
 		//this.wallLayer = new Raphael(this.$wallLayer.get(0), this.width, this.height);
 		//this.topLayer  = new Raphael(this.$topLayer.get(0), this.width, this.height);
@@ -67,11 +94,17 @@ var mapper = {
 		this.paper = new Raphael(this.$paper.get(0), this.width, this.height);
 		this.layers.rooms = this.paper.set();
 		this.layers.walls = this.paper.set();
+		this.layers.grid = this.paper.set();
 		this.layers.decorations = this.paper.set();
 		
+		
+		
+		
 		var bg = this.paper.rect(0, 0, this.width, this.height).attr({fill: '#000'});
+		bg.toBack();
 		this.layers.rooms.push(bg);
 		
+		this.drawGrid();
 		
 		mapper.data.rooms = [];
 		mapper.data.doors = [];
@@ -146,9 +179,11 @@ var mapper = {
 		
 		//var rectangle = this.roomLayer.rect(x, y, width, height);
 		var rectangle = this.paper.rect(x, y, width, height);
+		//var rectangle = this.paper.stripedRect(x, y, width, height, {lineSpacing: this.gridSize, angle: 90});
 		this.layers.rooms.push(rectangle);
 		rectangle.attr({
-			        'fill': "url('img/large-grid.png')",
+			        //'fill': "url(http://dmapper.snm.com/img/large-grid.png)",
+							fill: '#fff',
 			'stroke-width': 0
 		});
 		this.outOfDate();
@@ -194,7 +229,8 @@ var mapper = {
 		var ellipse = this.paper.ellipse(x, y, rx, ry)
 		this.layers.rooms.push(ellipse);
 		ellipse.attr({
-			        'fill': "url('img/large-grid.png')",
+			        //'fill': "url('img/large-grid.png')",
+							fill: '#fff',
 			'stroke-width': 0
 		});
 		this.outOfDate();
@@ -462,6 +498,31 @@ var mapper = {
 		return cs.maps;
 		//
 		//return ml;
+	},
+	
+	getSVG: function() {
+		return this.paper.toSVG();
+	},
+	
+	
+	x_downloadDataURI: function(options) {
+		if(!options) {
+			return;
+		}
+		$.isPlainObject(options) || (options = {data: options});
+		
+		location.href = options.data;
+		
+		options.filename || (options.filename = "download." + options.data.split(",")[0].split(";")[0].substring(5).split("/")[1]);
+		options.url || (options.url = "http://download-data-uri.appspot.com/");
+		$('<form method="post" action="'+options.url+'" style="display:none"><input type="hidden" name="filename" value="'+options.filename+'"/><input type="hidden" name="data" value="'+options.data+'"/></form>').submit().remove();
+	},
+	
+	downloadDataURI: function(data) {
+		//document.location.href = data;
+		var $a = $('<a download="map.png" href="' + data + '">...</a>');
+		$('body').append($a);
+		$a.click();
 	}
 	
 };

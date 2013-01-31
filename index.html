@@ -58,6 +58,7 @@
 
 			<div id="workspace" class="col">
 				<div id="paper" class="layer"></div>
+				<canvas id="saveCanvas" style="width: 100%; height: 100%;"></canvas>
 				<!--<div id="baseLayer" class="layer"></div>
 				
 				<div id="wallLayer" class="layer"></div>
@@ -116,6 +117,8 @@
 						<input class="mapAction wideButton" type="button" value="List Maps (local)" data-action="listMaps"><br/>
 						<hr/>
 						<input class="mapAction wideButton" type="button" value="Save Map (server)" data-action="saveRemote"><br/>
+						<hr/>
+						<input class="mapAction wideButton" type="button" value="Save Image" data-action="saveImage"><br/>
 						<div class="dialog" id="mapList"></div>
 					</div><!-- /#files -->
 					
@@ -147,6 +150,10 @@
 	<!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
 	<script src="js/raphael-min.js"></script>
+	<script type="text/javascript" src="js/raphael.export.js"></script>
+	<script type="text/javascript" src="js/raphael.pattern.js"></script> 
+	<script type="text/javascript" src="js/rgbcolor.js"></script> 
+	<script type="text/javascript" src="js/canvg.js"></script> 
 	<script src="js/mapper.js"></script>
 	<script type="text/javascript">
 		
@@ -612,7 +619,18 @@
 			  $feature.fadeIn(100);
 
 			  return true;
-			}
+			};
+			
+			var saveImage = function() {
+				var svg = mapper.getSVG();
+				//console.log(svg);
+				var canvas = document.getElementById('saveCanvas');
+				canvg(canvas, svg);
+				var img = canvas.toDataURL("image/png");
+				img = img.replace('image/png', 'image/octet-stream;filename=map.png');
+				//mapper.downloadDataURI({data:img,filename:'map.png'});
+				mapper.downloadDataURI(img);
+			};
 			
 			$('.mapAction').click(function(e) {
 				var $this = $(this);
@@ -668,6 +686,8 @@
 					case 'player':
 						ret = addPlayer();
 						break;
+					case 'saveImage':
+						ret = saveImage();
 					default:
 						console.log("Unknown action: " + action);
 				}
