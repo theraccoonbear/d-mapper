@@ -130,7 +130,7 @@ var mapper = {
 		this.layers.rooms.push(rectangle);
 		rectangle.attr({
 			        'fill': "url('img/" + fill + "-stairs.png')",
-			'stroke-width': 0
+			'stroke-width': 0,
 		});
 		this.outOfDate();
 		this.saveRoom(room, rectangle);

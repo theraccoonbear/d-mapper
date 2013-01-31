@@ -161,7 +161,7 @@
 				title: "Map Controls",
 				resizable: false,
 				height: 'auto',
-				width: 500
+				width: 'auto'
 			});
 			
 			$('#tabs').tabs();
@@ -199,8 +199,15 @@
 				var rooms = mapper.data.rooms;
 				for (var i = 0; i < rooms.length; i++) {
 					var r = rooms[i];
-					$roomList.append('<li class="roomLink"><a href="#" data-idx="' + i + '">Room #' + (i + 1) + '</a></li>');
+					$roomList.append('<li class="roomLink"><a href="#" class="deleteRoom" data-idx="' + i + '"><img src="img/close-button.png" alt="X" /></a> <a href="#" data-idx="' + i + '">Room #' + (i + 1) + '</a></li>');
 				}
+				
+				$('.deleteRoom').click(function() {
+					var $this = $(this);
+					var idx = $this.data('idx');
+					var room = mapper.data.rooms[idx];
+					console.log(room)
+				});
 			};
 			
 			var addRoom = function() {
