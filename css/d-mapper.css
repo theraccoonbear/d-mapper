@@ -160,3 +160,7 @@ label > input.integer {
 	display: inline-block;
 	background-image: url(../img/close-button.png);
 }
+
+.ui-tabs-anchor {
+	font-size: 12px;
+}

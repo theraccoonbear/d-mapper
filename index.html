@@ -57,11 +57,12 @@
 			</div>
 
 			<div id="workspace" class="col">
-				<div id="baseLayer" class="layer"></div>
+				<div id="paper" class="layer"></div>
+				<!--<div id="baseLayer" class="layer"></div>
 				
 				<div id="wallLayer" class="layer"></div>
 				
-				<div id="topLayer" class="layer"></div>
+				<div id="topLayer" class="layer"></div>-->
 			</div><!-- /#workspace -->
 			
 			<div id="controls" class="col">
@@ -78,6 +79,7 @@
 						<li><a href="#decoration">Details</a></li>
 						<li><a href="#files">Maps</a></li>
 						<li><a href="#rooms">Rooms</a></li>
+						<li><a href="#config">Config</a></li>
 					</ul>
 					
 					
@@ -112,12 +114,19 @@
 						<input class="mapAction wideButton" type="button" value="Save Map (local)" data-action="save"><br/>
 						<input class="mapAction wideButton" type="button" value="Load Map (local)" data-action="load"><br/>
 						<input class="mapAction wideButton" type="button" value="List Maps (local)" data-action="listMaps"><br/>
+						<hr/>
+						<input class="mapAction wideButton" type="button" value="Save Map (server)" data-action="saveRemote"><br/>
 						<div class="dialog" id="mapList"></div>
 					</div><!-- /#files -->
 					
 					<div id="rooms" class="formContainer">
 						<ul class="list"></ul>
 					</div><!-- /#files -->
+					
+					<div id="config" class="formContainer">
+						<label for="keyBinding">Add Keybinding</label>
+						
+					</div>
 					
 				</div><!-- /#tabs -->
 			</div><!-- /# controls -->
@@ -483,6 +492,15 @@
 				return true;
 			};
 			
+			var saveMapRemote = function() {
+				var mapName = $('#map-name').val();
+				if (mapper.saveRemote(mapper.data)) {
+					$('#map-name').removeClass('error');
+				} else {
+					$('#map-name').addClass('error');
+				}
+			};
+			
 			var loadMap = function() {
 				if (!mapper.saved) {
 					if (!confirm("You have unsaved changes, are you sure?")) {
@@ -624,6 +642,9 @@
 						break;
 					case 'newMap':
 						ret = newMap();
+						break;
+					case 'saveRemote':
+						ret = saveMapRemote();
 						break;
 					case'save':
 						ret = saveMap();

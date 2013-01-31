@@ -14,6 +14,15 @@ var mapper = {
 	topLayer: null,
 	$topLayer: null,
 	
+	$paper: {},
+	paper: {},
+	
+	layers: {
+		rooms: {},
+		walls: {},
+		decorations: {}
+	},
+	
 	didInit: false,
 	
 	data: {
@@ -40,17 +49,28 @@ var mapper = {
 	},
 	
 	clear: function() {
-		this.$roomLayer.html('');
-		this.$wallLayer.html('');
-		this.$topLayer.html('');
+		this.$paper.html('');
+		//this.$roomLayer.html('');
+		//this.$wallLayer.html('');
+		//this.$topLayer.html('');
 		
-		this.width = this.$roomLayer.width();
-		this.height = this.$roomLayer.height();
+		//this.width = this.$roomLayer.width();
+		//this.height = this.$roomLayer.height();
+		this.width = this.$paper.width();
+		this.height = this.$paper.height();
 		
-		this.roomLayer = new Raphael(this.$roomLayer.get(0), this.width, this.height);
-		this.wallLayer = new Raphael(this.$wallLayer.get(0), this.width, this.height);
-		this.topLayer  = new Raphael(this.$topLayer.get(0), this.width, this.height);
-		this.roomLayer.rect(0, 0, this.width, this.height).attr({fill: '#000'});
+		//this.roomLayer = new Raphael(this.$roomLayer.get(0), this.width, this.height);
+		//this.wallLayer = new Raphael(this.$wallLayer.get(0), this.width, this.height);
+		//this.topLayer  = new Raphael(this.$topLayer.get(0), this.width, this.height);
+		//this.roomLayer.rect(0, 0, this.width, this.height).attr({fill: '#000'});
+		
+		this.paper = new Raphael(this.$paper.get(0), this.width, this.height);
+		this.layers.rooms = this.paper.set();
+		this.layers.walls = this.paper.set();
+		this.layers.decorations = this.paper.set();
+		
+		var bg = this.paper.rect(0, 0, this.width, this.height).attr({fill: '#000'});
+		this.layers.rooms.push(bg);
 		
 		
 		mapper.data.rooms = [];
@@ -64,6 +84,7 @@ var mapper = {
 	
 	init: function(options) {
 		var o = {
+			paper: '#paper',
 			base: '#baseLayer',
 			wallLayer: '#wallLayer',
 			topLayer: '#topLayer',
@@ -71,9 +92,11 @@ var mapper = {
 		
 		$.extend(o, options);
 		
-		this.$roomLayer = $(o.base);
-		this.$wallLayer = $(o.wallLayer);
-		this.$topLayer = $(o.topLayer);
+		this.$paper = $(o.paper);
+		
+		//this.$roomLayer = $(o.base);
+		//this.$wallLayer = $(o.wallLayer);
+		//this.$topLayer = $(o.topLayer);
 		
 		this.clear();
 		
@@ -102,7 +125,9 @@ var mapper = {
 		
 		room.type = 'stairs';
 		
-		var rectangle = this.roomLayer.rect(x, y, width, height);
+		//var rectangle = this.roomLayer.rect(x, y, width, height);
+		var rectangle = this.paper.rect(x, y, width, height);
+		this.layers.rooms.push(rectangle);
 		rectangle.attr({
 			        'fill': "url('img/" + fill + "-stairs.png')",
 			'stroke-width': 0
@@ -119,7 +144,9 @@ var mapper = {
 		var height = (room.h * this.gridSize) + 1;
 		room.type = 'rectangle';
 		
-		var rectangle = this.roomLayer.rect(x, y, width, height);
+		//var rectangle = this.roomLayer.rect(x, y, width, height);
+		var rectangle = this.paper.rect(x, y, width, height);
+		this.layers.rooms.push(rectangle);
 		rectangle.attr({
 			        'fill': "url('img/large-grid.png')",
 			'stroke-width': 0
@@ -136,12 +163,14 @@ var mapper = {
 		var height = (wall.h * this.gridSize) + 1;
 		wall.type = 'rectangle';
 		
-		x += 1;
-		y += 1;
-		width -= 2;
-		height -= 2;
+		//x += 1;
+		//y += 1;
+		//width -= 2;
+		//height -= 2;
 		
-		var rectangle = this.wallLayer.rect(x, y, width, height);
+		//var rectangle = this.wallLayer.rect(x, y, width, height);
+		var rectangle = this.paper.rect(x, y, width, height);
+		this.layers.walls.push(rectangle);
 		rectangle.attr({
 			        'fill': "#000",
 			'stroke-width': 1,
@@ -161,7 +190,9 @@ var mapper = {
 		
 		room.type = 'ellipse';
 		
-		var ellipse = this.roomLayer.ellipse(x, y, rx, ry)
+		//var ellipse = this.roomLayer.ellipse(x, y, rx, ry)
+		var ellipse = this.paper.ellipse(x, y, rx, ry)
+		this.layers.rooms.push(ellipse);
 		ellipse.attr({
 			        'fill': "url('img/large-grid.png')",
 			'stroke-width': 0
@@ -182,7 +213,9 @@ var mapper = {
 		
 		wall.type = 'ellipse';
 		
-		var ellipse = this.wallLayer.ellipse(x, y, rx, ry)
+		//var ellipse = this.wallLayer.ellipse(x, y, rx, ry)
+		var ellipse = this.paper.ellipse(x, y, rx, ry)
+		this.layers.walls.push(ellipse);
 		ellipse.attr({
 			        'fill': "#000",
 			'stroke-width': 1,
@@ -201,10 +234,14 @@ var mapper = {
 		var block = null;
 		
 		if (orient == this.VERT) {
-			block = this.topLayer.rect(x + -1, y + 4, 3, gs - 7);
+			//block = this.topLayer.rect(x + -1, y + 4, 3, gs - 7);
+			block = this.paper.rect(x + -1, y + 4, 3, gs - 7);
 		} else {
-			block = this.topLayer.rect(x + 4, y - 1, gs - 7, 3);
+			//block = this.topLayer.rect(x + 4, y - 1, gs - 7, 3);
+			block = this.paper.rect(x + 4, y - 1, gs - 7, 3);
 		}
+		
+		this.layers.decorations.push(block);
 		
 		block.attr({
 			'fill': '#fff',
@@ -224,7 +261,9 @@ var mapper = {
 		var y = (col.y * gs) + r;
 		
 		
-		var circle = this.topLayer.circle(x, y, r - 4); 
+		//var circle = this.topLayer.circle(x, y, r - 4);
+		var circle = this.paper.circle(x, y, r - 4);
+		this.layers.decorations.push(circle);
 		circle.attr({
 			        'fill': "#666",
 			'stroke-width': 1,
@@ -263,7 +302,9 @@ var mapper = {
 		var x = mov.x * gs;
 		var y = mov.y * gs;
 		
-		var rectangle = this.topLayer.rect(x, y, 16, 16);
+		//var rectangle = this.topLayer.rect(x, y, 16, 16);
+		var rectangle = this.paper.rect(x, y, 16, 16);
+		this.layers.decorations.push(rectangle);
 		rectangle.attr({
 			        'fill': "url('img/moveable-" + mov.type + ".png')",
 			'stroke-width': 0
@@ -282,6 +323,21 @@ var mapper = {
 	
 	snapPixel: function(p) {
 		return this.pixelToGrid(p) * this.gridSize;
+	},
+	
+	saveRemote: function(m) {
+		m = typeof m == 'undefined' ? mapper.data : m;
+		
+		$.ajax('/upload.php', {
+			method: 'POST',
+			data: {
+				map: m
+			},
+			success: function(data, status, xhr) {
+				console.log("Success!");
+				console.log(data);
+			}
+		});
 	},
 	
 	saveLocal: function(o) {
@@ -351,10 +407,10 @@ var mapper = {
 			}
 			
 			for (var idx in mapData.walls) {
-				if (mapData.walls[idx].opt.type == 'ellipse') {
-					this.drawRoundWall(mapData.walls[idx].opt);
+				if (mapData.walls[idx].type == 'ellipse') {
+					this.drawRoundWall(mapData.walls[idx]);
 				} else {
-					this.drawRectWall(mapData.walls[idx].opt);
+					this.drawRectWall(mapData.walls[idx]);
 				}
 			}
 			
