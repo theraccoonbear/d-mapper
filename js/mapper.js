@@ -519,10 +519,10 @@ var mapper = {
 	},
 	
 	downloadDataURI: function(data) {
-		//document.location.href = data;
-		var $a = $('<a download="map.png" href="' + data + '">...</a>');
-		$('body').append($a);
-		$a.click();
+		document.location.href = data;
+		//var $a = $('<a download="map.png" href="' + data + '">...</a>');
+		//$('body').append($a);
+		//$a.click();
 	}
 	
 };
