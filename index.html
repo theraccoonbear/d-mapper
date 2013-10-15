@@ -154,12 +154,22 @@
 	<script type="text/javascript" src="js/raphael.pattern.js"></script> 
 	<script type="text/javascript" src="js/rgbcolor.js"></script> 
 	<script type="text/javascript" src="js/canvg.js"></script> 
+	<script src="http://sirest.bhffc.com/js/class.js"></script>
+	<script src="http://sirest.bhffc.com/js/sirest.js"></script>
 	<script src="js/mapper.js"></script>
 	<script type="text/javascript">
-		
+		var sirest;
 		var layout_rgx = new RegExp(/^\s*?(\d+)\s*?,\s*?(\d+)\s*?-\s*?(\d+)\s*?,\s*?(\d+)\s*?$/);
 		
 		$(function() {
+			sirest = new Sirest();
+			sirest.authenticate('dmapper', 'dm4pp3r', {
+				callback: function(r) {
+					console.log('Sirest authentication ' + (r.success ? 'successful' : 'failed'));
+				}
+			});
+
+
 			$('#controls').dialog({
 				closeOnEscape: false,
 				open: function(event, ui) {

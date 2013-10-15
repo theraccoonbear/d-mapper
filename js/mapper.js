@@ -364,16 +364,21 @@ var mapper = {
 	saveRemote: function(m) {
 		m = typeof m == 'undefined' ? mapper.data : m;
 		
-		$.ajax('/upload.php', {
-			method: 'POST',
-			data: {
-				map: m
-			},
-			success: function(data, status, xhr) {
-				console.log("Success!");
-				console.log(data);
+		sirest.store('my-map', m, {
+			callback: function(r) {
+				console.log(r);
 			}
 		});
+		// $.ajax('/upload.php', {
+		// 	method: 'POST',
+		// 	data: {
+		// 		map: m
+		// 	},
+		// 	success: function(data, status, xhr) {
+		// 		console.log("Success!");
+		// 		console.log(data);
+		// 	}
+		// });
 	},
 	
 	saveLocal: function(o) {
